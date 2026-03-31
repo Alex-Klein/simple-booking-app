@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - "80:3001"
+    volumes:
+      - ./data:/data
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DB_PATH: /data/cabin.db
+      DATA_DIR: /data
+    restart: unless-stopped

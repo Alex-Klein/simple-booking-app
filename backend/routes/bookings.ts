@@ -1,0 +1,167 @@
+import { Router } from 'express'
+import { nanoid } from 'nanoid'
+import db from '../db.js'
+import { sendBookingEmails, sendPendingBookingEmails, sendDeclineEmail } from '../email.js'
+import { requireAdmin } from '../middleware/auth.js'
+
+const router = Router()
+
+function getTrustedEmails(): string[] {
+  return (process.env.TRUSTED_EMAILS ?? '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean)
+}
+
+// GET /api/bookings — all bookings
+router.get('/', (_req, res) => {
+  const bookings = db.prepare('SELECT * FROM bookings ORDER BY check_in ASC').all()
+  res.json(bookings)
+})
+
+// POST /api/bookings — create a booking
+router.post('/', (req, res) => {
+  const { name, email, guests, notes, check_in, check_out } = req.body
+
+  if (!name || !email || !check_in || !check_out) {
+    res.status(400).json({ error: 'name, email, check_in and check_out are required' })
+    return
+  }
+
+  // Check for overlap with existing bookings
+  const overlap = db.prepare(`
+    SELECT id FROM bookings
+    WHERE check_in < @check_out AND check_out > @check_in
+  `).get({ check_in, check_out })
+
+  if (overlap) {
+    res.status(409).json({ error: 'Those dates overlap with an existing booking' })
+    return
+  }
+
+  const trusted = getTrustedEmails()
+  const status = trusted.includes(email.toLowerCase()) ? 'confirmed' : 'pending'
+  const cancel_token = nanoid(32)
+
+  const result = db.prepare(`
+    INSERT INTO bookings (name, email, guests, notes, check_in, check_out, cancel_token, status)
+    VALUES (@name, @email, @guests, @notes, @check_in, @check_out, @cancel_token, @status)
+  `).run({ name, email, guests: guests ?? 1, notes: notes ?? '', check_in, check_out, cancel_token, status })
+
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(result.lastInsertRowid) as any
+
+  const appUrl = process.env.APP_URL ?? 'http://localhost:5173'
+  const cancelUrl = `${appUrl}/cancel?token=${cancel_token}`
+
+  if (status === 'confirmed') {
+    // Auto-confirmed: send regular confirmation email
+    sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
+      console.error('Email send failed:', err)
+    )
+  } else {
+    // Pending: notify guest their request was received, notify admin to approve
+    sendPendingBookingEmails({ name, email, guests, notes, check_in, check_out, appUrl }).catch((err) =>
+      console.error('Email send failed:', err)
+    )
+  }
+
+  res.status(201).json(booking)
+})
+
+// POST /api/bookings/:id/confirm — approve a pending booking (admin only)
+router.post('/:id/confirm', requireAdmin, (req, res) => {
+  const { id } = req.params
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(id) as any
+
+  if (!booking) {
+    res.status(404).json({ error: 'Booking not found' })
+    return
+  }
+
+  if (booking.status === 'confirmed') {
+    res.status(400).json({ error: 'Booking is already confirmed' })
+    return
+  }
+
+  db.prepare("UPDATE bookings SET status = 'confirmed' WHERE id = ?").run(id)
+  const updated = db.prepare('SELECT * FROM bookings WHERE id = ?').get(id) as any
+
+  const cancelUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/cancel?token=${booking.cancel_token}`
+  const { name, email, guests, notes, check_in, check_out } = booking
+  sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
+    console.error('Approval email failed:', err)
+  )
+
+  res.json(updated)
+})
+
+// POST /api/bookings/:id/decline — decline a pending booking (admin only)
+router.post('/:id/decline', requireAdmin, (req, res) => {
+  const { id } = req.params
+  const { reason } = req.body
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(id) as any
+
+  if (!booking) {
+    res.status(404).json({ error: 'Booking not found' })
+    return
+  }
+
+  if (booking.status !== 'pending') {
+    res.status(400).json({ error: 'Only pending bookings can be declined' })
+    return
+  }
+
+  db.prepare('DELETE FROM bookings WHERE id = ?').run(id)
+
+  const { name, email, check_in, check_out } = booking
+  sendDeclineEmail({ name, email, check_in, check_out, reason: reason || undefined }).catch((err) =>
+    console.error('Decline email failed:', err)
+  )
+
+  res.status(204).send()
+})
+
+// PUT /api/bookings/:id — update a booking (admin only)
+router.put('/:id', requireAdmin, (req, res) => {
+  const { id } = req.params
+  const { name, email, guests, notes, check_in, check_out } = req.body
+
+  const existing = db.prepare('SELECT id FROM bookings WHERE id = ?').get(id)
+  if (!existing) {
+    res.status(404).json({ error: 'Booking not found' })
+    return
+  }
+
+  const overlap = db.prepare(`
+    SELECT id FROM bookings
+    WHERE id != @id AND check_in < @check_out AND check_out > @check_in
+  `).get({ id, check_in, check_out })
+
+  if (overlap) {
+    res.status(409).json({ error: 'Those dates overlap with an existing booking' })
+    return
+  }
+
+  db.prepare(`
+    UPDATE bookings SET name=@name, email=@email, guests=@guests, notes=@notes,
+    check_in=@check_in, check_out=@check_out WHERE id=@id
+  `).run({ id, name, email, guests, notes, check_in, check_out })
+
+  res.json(db.prepare('SELECT * FROM bookings WHERE id = ?').get(id))
+})
+
+// DELETE /api/bookings/:id — cancel a booking (admin only)
+router.delete('/:id', requireAdmin, (req, res) => {
+  const { id } = req.params
+  const booking = db.prepare('SELECT id FROM bookings WHERE id = ?').get(id)
+
+  if (!booking) {
+    res.status(404).json({ error: 'Booking not found' })
+    return
+  }
+
+  db.prepare('DELETE FROM bookings WHERE id = ?').run(id)
+  res.status(204).send()
+})
+
+export default router

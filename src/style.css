@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cabin-50 text-cabin-900 font-sans antialiased dark:bg-gray-900 dark:text-gray-100;
+  }
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+}
+
+/* Force v-calendar to fill its container on mobile */
+.vc-container {
+  width: 100% !important;
+}
+.vc-pane-container {
+  width: 100% !important;
+}
+.vc-pane {
+  width: 100% !important;
+}
+.vc-weeks {
+  width: 100% !important;
+}
+.vc-week, .vc-weekdays {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+}
