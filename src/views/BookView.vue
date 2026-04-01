@@ -43,7 +43,8 @@
 
       <VDatePicker
         ref="pickerRef"
-        v-model.range="dateRange"
+        :model-value="dateRange"
+        @update:model-value="onRangeUpdate"
         :min-date="today"
         :disabled-dates="disabledDates"
         :attributes="calendarAttributes"
@@ -117,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '../stores/booking'
@@ -274,18 +275,16 @@ const calendarAttributes = computed(() => [
 ])
 
 // --- Date range binding ---
-const dateRange = ref<{ start: Date | null; end: Date | null }>({
-  start: store.checkIn,
-  end: store.checkOut,
-})
+// Computed so the calendar always reflects store state (e.g. on back-navigation).
+const dateRange = computed(() => ({ start: store.checkIn, end: store.checkOut }))
 
-watch(dateRange, (val) => {
+function onRangeUpdate(val: { start: Date; end: Date } | null) {
   if (val?.start && val?.end) {
     store.setDates(val.start, val.end)
   } else {
     store.clearDates()
   }
-}, { deep: true })
+}
 
 // --- Form ---
 const error = ref('')
