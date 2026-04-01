@@ -41,17 +41,5 @@ if (!cols.includes('status')) {
   db.exec("ALTER TABLE bookings ADD COLUMN status TEXT NOT NULL DEFAULT 'confirmed'")
 }
 
-// Seed some initial bookings if the table is empty
-const count = (db.prepare('SELECT COUNT(*) as n FROM bookings').get() as { n: number }).n
-if (count === 0) {
-  const insert = db.prepare(`
-    INSERT INTO bookings (name, email, guests, notes, check_in, check_out)
-    VALUES (@name, @email, @guests, @notes, @check_in, @check_out)
-  `)
-  insert.run({ name: 'Uncle Marc',    email: 'marc@family.com',   guests: 2, notes: '', check_in: '2026-04-10', check_out: '2026-04-14' })
-  insert.run({ name: 'Sophie & kids', email: 'sophie@family.com', guests: 4, notes: 'Bringing the dog', check_in: '2026-05-01', check_out: '2026-05-03' })
-  insert.run({ name: 'Hans',          email: 'hans@family.com',   guests: 2, notes: '', check_in: '2026-05-18', check_out: '2026-05-22' })
-  insert.run({ name: 'Mia',           email: 'mia@family.com',    guests: 3, notes: 'Anniversary trip', check_in: '2026-06-05', check_out: '2026-06-09' })
-}
 
 export default db
