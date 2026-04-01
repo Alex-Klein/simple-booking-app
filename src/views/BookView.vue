@@ -156,13 +156,16 @@ function localDate(str: string): Date {
 }
 
 // --- Disabled dates (blocks selection) ---
-// Range ends at check_out - 1 so the checkout date is selectable as a new check-in.
-// (back-to-back bookings: guest A checks out on day X, guest B can check in on day X)
+// Disabled range = (check_in + 1) to (check_out - 1), i.e. only the interior nights.
+// This lets check_in be selected as a checkout for a prior booking, and
+// check_out be selected as a check-in for a following booking (back-to-back).
 const disabledDates = computed(() =>
   store.bookedPeriods.map((p) => {
+    const start = localDate(p.check_in)
+    start.setDate(start.getDate() + 1)
     const end = localDate(p.check_out)
     end.setDate(end.getDate() - 1)
-    return { start: localDate(p.check_in), end }
+    return { start, end }
   })
 )
 
