@@ -44,9 +44,9 @@ app.use('/api/calendar.ics', calendarRouter)
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=1400&q=80'
 const DATA_DIR = process.env.DATA_DIR ?? path.join(__dirname, '../data')
 app.get('/bg.jpg', (req, res) => {
-  const jpg = path.join(DATA_DIR, 'bg.jpg')
   const jpeg = path.join(DATA_DIR, 'bg.jpeg')
-  const customBg = fs.existsSync(jpg) ? jpg : fs.existsSync(jpeg) ? jpeg : null
+  const jpg = path.join(DATA_DIR, 'bg.jpg')
+  const customBg = fs.existsSync(jpeg) ? jpeg : fs.existsSync(jpg) ? jpg : null
   if (customBg) {
     res.sendFile(customBg)
   } else {

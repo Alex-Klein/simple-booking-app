@@ -112,10 +112,10 @@ LOG_LEVEL=info
 
 ### Hero background image
 
-Drop a `bg.jpg` or `bg.jpeg` into the `data/` folder — it is served automatically with no rebuild required. If no file is present, a default landscape photo is used as fallback.
+Drop a `bg.jpeg` into the `data/` folder — it is served automatically with no rebuild required. `bg.jpg` is also accepted as a fallback. If no file is present, a default landscape photo is used.
 
-- **Without Docker:** place the image at `data/bg.jpg` in the project root
-- **With Docker:** place the image at `./data/bg.jpg` on the server (same folder as the database)
+- **Without Docker:** place the image at `data/bg.jpeg` in the project root
+- **With Docker:** place the image at `./data/bg.jpeg` on the server (same folder as the database)
 
 ---
 
