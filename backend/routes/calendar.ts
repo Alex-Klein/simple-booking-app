@@ -42,10 +42,11 @@ router.get('/', (req, res) => {
 
   const appName = process.env.APP_NAME ?? 'Cabin'
   const appUrl = (process.env.APP_URL ?? 'http://localhost:3001').replace(/\/$/, '')
+  const prefix = process.env.CALENDAR_PREFIX ? `${process.env.CALENDAR_PREFIX} ` : ''
   const now = toIcsTimestamp(new Date())
 
   const events = bookings.map((b) => {
-    const summary = escapeIcs(`${b.name}${b.guests > 1 ? ` (${b.guests} guests)` : ''}`)
+    const summary = escapeIcs(`${prefix}${b.name}`)
     const description = escapeIcs(b.notes || '')
     return [
       'BEGIN:VEVENT',
