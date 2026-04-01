@@ -9,7 +9,7 @@
 
 ## Infrastructure
 
-- [ ] **www subdomain** — add an A record for `www.hugishues.li` → `83.228.208.33` in OpenSRS, then re-run `init-ssl.sh` (or expand the cert with `-d www.hugishues.li`) and verify the nginx redirect works
+
 
 ## Features
 
