@@ -249,23 +249,25 @@ const calendarAttributes = computed(() => [
         dates: { start: localDate(p.check_in), end: highlightEnd },
       },
       {
-        // Checkout day: dot only — selectable as a new check-in
+        // Check-in day: dot + "X checks in" label visible in cell
+        key: `${p.id}-checkin`,
+        dot: { color },
+        label: firstNameOf(p.name),
+        popover: {
+          label: `${p.name} checks in${isPending ? ' (pending)' : ''}`,
+          visibility: 'hover',
+        },
+        dates: localDate(p.check_in),
+      },
+      {
+        // Checkout day: dot + "X checks out" — selectable as a new check-in
         key: `${p.id}-checkout`,
-        dot: { color, fillMode: 'light' },
+        dot: { color },
         popover: {
           label: `${firstNameOf(p.name)} checks out`,
           visibility: 'hover',
         },
         dates: localDate(p.check_out),
-      },
-      {
-        key: `${p.id}-label`,
-        label: firstNameOf(p.name),
-        popover: {
-          label: `${p.name} (${p.email})${isPending ? ' — pending' : ''}`,
-          visibility: 'hover',
-        },
-        dates: localDate(p.check_in),
       },
     ]
   }),
