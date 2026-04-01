@@ -8,6 +8,7 @@
       <div class="flex items-center gap-3">
         <!-- iCal feed URL -->
         <div v-if="calendarUrl" class="flex items-center gap-2 bg-cabin-50 dark:bg-gray-700 border border-cabin-200 dark:border-gray-600 rounded-lg px-3 py-1.5">
+          <span class="text-xs text-cabin-500 dark:text-gray-400">{{ t('admin.calendarSubscribe') }}</span>
           <svg class="w-4 h-4 text-cabin-400 dark:text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
           <span class="text-xs text-cabin-500 dark:text-gray-400 font-mono max-w-[260px] truncate">{{ calendarUrl }}</span>
           <button @click="copyCalendarUrl" class="text-cabin-400 dark:text-gray-400 hover:text-cabin-700 dark:hover:text-gray-200 transition-colors" :title="t('admin.calendarCopy')">

@@ -97,6 +97,7 @@ export default {
     saving: 'Saving…',
     deleteTitle: 'Delete booking?',
     deleting: 'Deleting…',
+    calendarSubscribe: 'Subscribe to your local calendar:',
     calendarCopy: 'Copy calendar URL',
   },
 }
