@@ -56,7 +56,8 @@ docker run --rm \
   --email "$CERTBOT_EMAIL" \
   --agree-tos \
   --no-eff-email \
-  -d "$DOMAIN"
+  -d "$DOMAIN" \
+  -d "www.$DOMAIN"
 
 # Step 3 — Stop the temporary nginx
 docker stop tmp-nginx
