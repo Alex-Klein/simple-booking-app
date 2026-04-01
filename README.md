@@ -21,12 +21,14 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 - **Approve or decline** pending bookings; when declining, an optional reason can be entered and is included in the email sent to the guest
 - **Edit or delete** any booking directly from the dashboard
 - **Status badges** — bookings are shown as Pending (amber) or Confirmed (green)
+- **iCalendar feed** — subscribe to `/api/calendar.ics` in any calendar app for live sync
 
 ### Technical
 - Conflict detection — overlapping dates are rejected at the API level
 - Email delivery via [Resend](https://resend.com)
-- SQLite database — simple, zero-config, file-based
+- SQLite database — simple, zero-config, file-based; directory is auto-created on first deploy
 - JWT-based admin authentication (7-day tokens)
+- Structured JSON logging via [pino](https://getpino.io) (pretty-printed in dev)
 
 ---
 
@@ -75,6 +77,10 @@ APP_URL=https://yourcabin.com
 # Comma-separated list of email addresses that are auto-confirmed without admin approval
 # Leave empty to require approval for everyone
 TRUSTED_EMAILS=alice@example.com,bob@example.com
+
+# Secret token to protect the iCal feed — append ?token=<value> when subscribing
+# Leave empty to make the feed public (not recommended)
+CALENDAR_TOKEN=change-this-to-a-random-string
 ```
 
 ### Hero background image
@@ -222,10 +228,12 @@ cabin-reserve/
 │   ├── email.ts          # Resend email functions
 │   ├── middleware/
 │   │   └── auth.ts       # JWT middleware
+│   ├── logger.ts         # pino logger (pretty in dev, JSON in prod)
 │   └── routes/
 │       ├── auth.ts       # POST /api/auth/login
 │       ├── bookings.ts   # Booking CRUD + approve/decline
-│       └── cancel.ts     # Token-based self-service cancellation
+│       ├── cancel.ts     # Token-based self-service cancellation
+│       └── calendar.ts   # GET /api/calendar.ics — iCal feed
 ├── src/
 │   ├── views/
 │   │   ├── HomeView.vue      # Hero image configured here
@@ -245,6 +253,24 @@ cabin-reserve/
 ├── .env.example          # Copy to .env and fill in your values
 └── .env                  # Not committed
 ```
+
+---
+
+## iCalendar feed
+
+All confirmed bookings are available as a subscribable iCal feed:
+
+```
+https://yourcabin.com/api/calendar.ics?token=<CALENDAR_TOKEN>
+```
+
+Subscribe once in your calendar app and it will sync automatically:
+
+- **Apple Calendar** → File → New Calendar Subscription → paste the URL
+- **Google Calendar** → Other calendars → From URL → paste the URL
+- **Outlook** → Add calendar → From internet → paste the URL
+
+If `CALENDAR_TOKEN` is not set in `.env`, the feed is public (no token required).
 
 ---
 
