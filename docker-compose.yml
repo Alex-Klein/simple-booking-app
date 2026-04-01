@@ -1,6 +1,9 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME}
     ports:
       - "80:3001"
     volumes:
