@@ -11,7 +11,7 @@ import cancelRouter from './routes/cancel.js'
 import calendarRouter from './routes/calendar.js'
 
 const app = express()
-const PORT = 3001
+const PORT = parseInt(process.env.PORT ?? '3001', 10)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 if (process.env.NODE_ENV !== 'production') {
