@@ -5,7 +5,7 @@
 - [ ] **Nights count missing number** — the summary bar may show "nights" without the digit in front; should read "3 nights" not just "nights"
 - [ ] **Verify back-to-back visuals** — confirm half-day range caps and merged tooltip look correct in production after latest calendar changes
 - [ ] **Existing bookings shifted by one day** — the UTC→local timezone fix may have silently stored wrong dates for bookings made before the fix; worth reviewing any bookings that pre-date the fix
-- [ ] **Resend email broken** — `FROM_EMAIL` must use a domain verified in Resend; `hugishues.li` needs DNS records added in OpenSRS and verified in the Resend dashboard (or use `onboarding@resend.dev` temporarily)
+
 
 ## Infrastructure
 
