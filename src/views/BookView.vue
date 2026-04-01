@@ -238,21 +238,21 @@ const calendarAttributes = computed(() => [
   ...store.bookedPeriods.flatMap((p) => {
     const color = personColors.value.get(p.email) ?? 'red'
     const isPending = p.status === 'pending'
-    // Highlight covers only the booked nights (check_in to check_out - 1)
-    const highlightEnd = localDate(p.check_out)
-    highlightEnd.setDate(highlightEnd.getDate() - 1)
     return [
       {
+        // Range from check_in to check_out (inclusive).
+        // v-calendar renders the start day as a right-half cap and the end day as a
+        // left-half cap, so boundary days naturally look like "half a day" is booked.
+        // On back-to-back bookings the shared day shows both halves in different colors.
         key: `${p.id}-highlight`,
         highlight: isPending
           ? { color, fillMode: 'light', style: PENDING_STYLE }
           : { color, fillMode: 'light' },
-        dates: { start: localDate(p.check_in), end: highlightEnd },
+        dates: { start: localDate(p.check_in), end: localDate(p.check_out) },
       },
       {
-        // Check-in day: dot + "X checks in" label visible in cell
+        // Check-in label + popover (no extra dot — highlight cap already marks the day)
         key: `${p.id}-checkin`,
-        dot: { color },
         label: firstNameOf(p.name),
         popover: {
           label: `${p.name} checks in${isPending ? ' (pending)' : ''}`,
@@ -261,9 +261,8 @@ const calendarAttributes = computed(() => [
         dates: localDate(p.check_in),
       },
       {
-        // Checkout day: dot + "X checks out" — selectable as a new check-in
+        // Check-out popover only — highlight end-cap already gives the visual
         key: `${p.id}-checkout`,
-        dot: { color },
         popover: {
           label: `${firstNameOf(p.name)} checks out`,
           visibility: 'hover',
