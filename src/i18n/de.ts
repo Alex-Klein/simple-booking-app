@@ -8,9 +8,9 @@ export default {
   home: {
     subtitle: 'Unser Familien-Rückzugsort mitten in den Bergen',
     cta: 'Verfügbarkeit prüfen & buchen',
-    amenitiesTitle: 'Was im Hüsli wartet',
+    amenitiesTitle: 'Was euch erwartet',
     ctaSection: 'Plant ihr einen Aufenthalt?',
-    ctaBody: 'Schaut, welche Daten frei sind, und reserviert eure Zeit im Hüsli.',
+    ctaBody: 'Schaut, welche Daten frei sind, und reserviert euren Aufenthalt.',
     ctaButton: 'Kalender anzeigen & buchen',
     amenities: [
       'Holzkamin', 'Vollküche', 'WLAN', 'Whirlpool',
@@ -19,7 +19,7 @@ export default {
     ],
   },
   book: {
-    title: 'Hüsli reservieren',
+    title: 'Aufenthalt reservieren',
     subtitle: 'Wählt eure Daten und füllt das Formular aus.',
     step1: 'Daten auswählen',
     step2: 'Eure Angaben',
