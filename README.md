@@ -187,29 +187,41 @@ pm2 restart cabin
 
 **1. Clone the repo on the server:**
 ```bash
-
 git clone https://github.com/Alex-Klein/simple-booking-app.git ~/simple-booking-app
 cd simple-booking-app
 ```
 
 **2. Create the `.env` file:**
 ```bash
-nano .env   # fill in all variables from the Environment variables section above
+cp .env.example .env
+nano .env   # fill in all variables
 ```
 
-**3. Build and start:**
+**3. Obtain an SSL certificate** (your domain must already point to this server):
+```bash
+chmod +x scripts/init-ssl.sh
+./scripts/init-ssl.sh
+```
+
+**4. Build and start:**
 ```bash
 docker compose up -d --build
 ```
 
-The app is now running on port 80. The SQLite database is stored in a Docker volume (`cabin-data`) and is never affected by redeployments.
+The app is now running on port 443 (HTTPS) with automatic HTTP → HTTPS redirect. The SQLite database is persisted in `./data/` and is never affected by redeployments.
 
 ### Deploying updates
 
 ```bash
-cd /srv/cabin
 git pull
 docker compose up -d --build
+```
+
+### SSL renewal
+
+Certificates are renewed automatically — the certbot container checks every 12 hours. To renew manually:
+```bash
+./scripts/renew-ssl.sh
 ```
 
 ### Useful commands
@@ -218,10 +230,10 @@ docker compose up -d --build
 # View logs
 docker compose logs -f
 
-# Stop the app
+# Stop everything
 docker compose down
 
-# Open a shell inside the container
+# Open a shell inside the app container
 docker compose exec app sh
 
 # Backup the database
