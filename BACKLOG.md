@@ -19,3 +19,6 @@
 - [ ] **Guest count in admin cards** — show number of guests next to each booking in the dashboard list
 - [ ] **Booking history** — keep a log of declined and cancelled bookings visible to admin (currently deleted from DB)
 - [ ] **Branded email templates** — replace plain-text emails with a simple HTML template matching the app's look
+- [ ] **remove guests** everywhere
+- [ ] email same language as in browser used when submit was pressed
+- [ ] apply language everywhere
