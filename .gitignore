@@ -1,4 +1,7 @@
 node_modules/
 dist/
 backend/cabin.db
+backend/cabin.db-shm
+backend/cabin.db-wal
 .env
+.claude

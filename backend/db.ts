@@ -1,9 +1,17 @@
 import Database from 'better-sqlite3'
+import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import logger from './logger.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dbPath = process.env.DB_PATH ?? path.join(__dirname, 'cabin.db')
+
+// Ensure the directory exists (critical on first deploy)
+const dbDir = path.dirname(dbPath)
+fs.mkdirSync(dbDir, { recursive: true })
+
+logger.info({ dbPath }, 'Opening database')
 const db = new Database(dbPath)
 
 // Enable WAL mode for better performance

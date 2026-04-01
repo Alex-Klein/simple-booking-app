@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { nanoid } from 'nanoid'
 import db from '../db.js'
+import logger from '../logger.js'
 import { sendBookingEmails, sendPendingBookingEmails, sendDeclineEmail } from '../email.js'
 import { requireAdmin } from '../middleware/auth.js'
 
@@ -56,12 +57,12 @@ router.post('/', (req, res) => {
   if (status === 'confirmed') {
     // Auto-confirmed: send regular confirmation email
     sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
-      console.error('Email send failed:', err)
+      logger.error({ err, bookingId: booking.id }, 'Confirmation email failed')
     )
   } else {
     // Pending: notify guest their request was received, notify admin to approve
     sendPendingBookingEmails({ name, email, guests, notes, check_in, check_out, appUrl }).catch((err) =>
-      console.error('Email send failed:', err)
+      logger.error({ err, bookingId: booking.id }, 'Pending notification email failed')
     )
   }
 
@@ -89,7 +90,7 @@ router.post('/:id/confirm', requireAdmin, (req, res) => {
   const cancelUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/cancel?token=${booking.cancel_token}`
   const { name, email, guests, notes, check_in, check_out } = booking
   sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
-    console.error('Approval email failed:', err)
+    logger.error({ err, bookingId: id }, 'Approval email failed')
   )
 
   res.json(updated)
@@ -115,7 +116,7 @@ router.post('/:id/decline', requireAdmin, (req, res) => {
 
   const { name, email, check_in, check_out } = booking
   sendDeclineEmail({ name, email, check_in, check_out, reason: reason || undefined }).catch((err) =>
-    console.error('Decline email failed:', err)
+    logger.error({ err, bookingId: id }, 'Decline email failed')
   )
 
   res.status(204).send()

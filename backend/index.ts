@@ -1,9 +1,10 @@
 import 'dotenv/config'
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import logger from './logger.js'
 import bookingsRouter from './routes/bookings.js'
 import authRouter from './routes/auth.js'
 import cancelRouter from './routes/cancel.js'
@@ -17,6 +18,17 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.use(express.json())
+
+// Request logger
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now()
+  res.on('finish', () => {
+    const ms = Date.now() - start
+    const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info'
+    logger[level]({ method: req.method, url: req.url, status: res.statusCode, ms }, 'request')
+  })
+  next()
+})
 
 app.use('/api/auth', authRouter)
 app.use('/api/bookings', bookingsRouter)
@@ -43,5 +55,5 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.listen(PORT, () => {
-  console.log(`Backend running at http://localhost:${PORT}`)
+  logger.info({ port: PORT }, 'Backend started')
 })
