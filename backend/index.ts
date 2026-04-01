@@ -20,13 +20,17 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(express.json())
 
+// Trust proxy so X-Forwarded-For from nginx is used for client IPs
+app.set('trust proxy', true)
+
 // Request logger
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now()
   res.on('finish', () => {
     const ms = Date.now() - start
     const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info'
-    logger[level]({ method: req.method, url: req.url, status: res.statusCode, ms }, 'request')
+    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ?? req.ip
+    logger[level]({ method: req.method, url: req.url, status: res.statusCode, ms, ip }, 'request')
   })
   next()
 })
