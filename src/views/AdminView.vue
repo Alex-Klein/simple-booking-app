@@ -238,7 +238,19 @@ async function fetchCalendarUrl() {
 }
 
 async function copyCalendarUrl() {
-  await navigator.clipboard.writeText(calendarUrl.value)
+  try {
+    await navigator.clipboard.writeText(calendarUrl.value)
+  } catch {
+    // Fallback for HTTP (no clipboard API)
+    const el = document.createElement('textarea')
+    el.value = calendarUrl.value
+    el.style.position = 'fixed'
+    el.style.opacity = '0'
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+  }
   copied.value = true
   setTimeout(() => { copied.value = false }, 2000)
 }
