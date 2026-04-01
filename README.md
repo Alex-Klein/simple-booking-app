@@ -21,14 +21,14 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 - **Approve or decline** pending bookings; when declining, an optional reason can be entered and is included in the email sent to the guest
 - **Edit or delete** any booking directly from the dashboard
 - **Status badges** — bookings are shown as Pending (amber) or Confirmed (green)
-- **iCalendar feed** — subscribe to `/api/calendar.ics` in any calendar app for live sync
+- **iCalendar feed** — subscribe to `/api/calendar.ics` in any calendar app for live sync; event titles support a configurable prefix via `CALENDAR_PREFIX`
 
 ### Technical
 - Conflict detection — overlapping dates are rejected at the API level
 - Email delivery via [Resend](https://resend.com)
 - SQLite database — simple, zero-config, file-based; directory is auto-created on first deploy
 - JWT-based admin authentication (7-day tokens)
-- Structured JSON logging via [pino](https://getpino.io) (pretty-printed in dev)
+- Structured logging via [pino](https://getpino.io) — human-readable with timestamps and client IPs in all environments
 
 ---
 
@@ -93,11 +93,26 @@ TRUSTED_EMAILS=alice@example.com,bob@example.com
 # Secret token to protect the iCal feed — append ?token=<value> when subscribing
 # Leave empty to make the feed public (not recommended)
 CALENDAR_TOKEN=change-this-to-a-random-string
+
+# Optional prefix for calendar event titles (e.g. "🏡" or "Cabin:")
+CALENDAR_PREFIX=🏡
+
+# Port the backend listens on (default: 3001)
+PORT=3001
+
+# Domain name — used by nginx and SSL certificate
+DOMAIN=yourcabin.com
+
+# Email for Let's Encrypt expiry notifications
+CERTBOT_EMAIL=you@example.com
+
+# Log level: trace | debug | info | warn | error (default: info)
+LOG_LEVEL=info
 ```
 
 ### Hero background image
 
-Drop a `bg.jpg` into the `data/` folder — it is served automatically with no rebuild required. If no file is present, a default landscape photo is used as fallback.
+Drop a `bg.jpg` or `bg.jpeg` into the `data/` folder — it is served automatically with no rebuild required. If no file is present, a default landscape photo is used as fallback.
 
 - **Without Docker:** place the image at `data/bg.jpg` in the project root
 - **With Docker:** place the image at `./data/bg.jpg` on the server (same folder as the database)
@@ -252,7 +267,7 @@ cabin-reserve/
 │   ├── email.ts          # Resend email functions
 │   ├── middleware/
 │   │   └── auth.ts       # JWT middleware
-│   ├── logger.ts         # pino logger (pretty in dev, JSON in prod)
+│   ├── logger.ts         # pino logger (human-readable, timestamps, client IPs)
 │   └── routes/
 │       ├── auth.ts       # POST /api/auth/login
 │       ├── bookings.ts   # Booking CRUD + approve/decline
@@ -272,10 +287,15 @@ cabin-reserve/
 │   └── i18n/
 │       ├── en.ts
 │       └── de.ts
+├── nginx/
+│   └── nginx.conf.template   # nginx config (DOMAIN + PORT substituted at startup)
+├── scripts/
+│   ├── init-ssl.sh           # First-time Let's Encrypt certificate issuance
+│   └── renew-ssl.sh          # Manual certificate renewal
 ├── Dockerfile
-├── docker-compose.yml
-├── .env.example          # Copy to .env and fill in your values
-└── .env                  # Not committed
+├── docker-compose.yml        # App + nginx + certbot
+├── .env.example              # Copy to .env and fill in your values
+└── .env                      # Not committed
 ```
 
 ---
