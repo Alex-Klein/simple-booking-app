@@ -8,6 +8,7 @@ import logger from './logger.js'
 import bookingsRouter from './routes/bookings.js'
 import authRouter from './routes/auth.js'
 import cancelRouter from './routes/cancel.js'
+import calendarRouter from './routes/calendar.js'
 
 const app = express()
 const PORT = 3001
@@ -33,6 +34,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use('/api/auth', authRouter)
 app.use('/api/bookings', bookingsRouter)
 app.use('/api/cancel', cancelRouter)
+app.use('/api/calendar.ics', calendarRouter)
 
 // Serve background image from data directory, falling back to default
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=1400&q=80'
