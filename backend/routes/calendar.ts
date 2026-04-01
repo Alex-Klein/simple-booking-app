@@ -7,7 +7,7 @@ const router = Router()
 
 // GET /api/calendar.ics/url — returns the full subscribable URL (admin only)
 router.get('/url', requireAdmin, (req, res) => {
-  const appUrl = process.env.APP_URL ?? `${req.protocol}://${req.headers.host}`
+  const appUrl = (process.env.APP_URL ?? `${req.protocol}://${req.headers.host}`).replace(/\/$/, '')
   const token = process.env.CALENDAR_TOKEN
   const url = token
     ? `${appUrl}/api/calendar.ics?token=${token}`
@@ -41,7 +41,7 @@ router.get('/', (req, res) => {
   ).all() as any[]
 
   const appName = process.env.APP_NAME ?? 'Cabin'
-  const appUrl = process.env.APP_URL ?? 'http://localhost:3001'
+  const appUrl = (process.env.APP_URL ?? 'http://localhost:3001').replace(/\/$/, '')
   const now = toIcsTimestamp(new Date())
 
   const events = bookings.map((b) => {
