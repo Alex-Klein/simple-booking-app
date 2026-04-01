@@ -5,12 +5,23 @@
         <h1 class="text-3xl font-serif text-cabin-800 dark:text-gray-100">{{ t('admin.title') }}</h1>
         <p class="text-cabin-500 dark:text-gray-400 text-sm mt-1">{{ t('admin.bookingsCount', bookings.length) }} total</p>
       </div>
-      <button
-        @click="auth.logout(); router.push('/')"
-        class="text-sm text-cabin-500 dark:text-gray-400 hover:text-cabin-700 dark:hover:text-gray-200 border border-cabin-200 dark:border-gray-600 px-3 py-1.5 rounded-lg transition-colors"
-      >
-        {{ t('admin.signOut') }}
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- iCal feed URL -->
+        <div v-if="calendarUrl" class="flex items-center gap-2 bg-cabin-50 dark:bg-gray-700 border border-cabin-200 dark:border-gray-600 rounded-lg px-3 py-1.5">
+          <svg class="w-4 h-4 text-cabin-400 dark:text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span class="text-xs text-cabin-500 dark:text-gray-400 font-mono max-w-[260px] truncate">{{ calendarUrl }}</span>
+          <button @click="copyCalendarUrl" class="text-cabin-400 dark:text-gray-400 hover:text-cabin-700 dark:hover:text-gray-200 transition-colors" :title="t('admin.calendarCopy')">
+            <svg v-if="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <svg v-else class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </button>
+        </div>
+        <button
+          @click="auth.logout(); router.push('/')"
+          class="text-sm text-cabin-500 dark:text-gray-400 hover:text-cabin-700 dark:hover:text-gray-200 border border-cabin-200 dark:border-gray-600 px-3 py-1.5 rounded-lg transition-colors"
+        >
+          {{ t('admin.signOut') }}
+        </button>
+      </div>
     </div>
 
     <!-- Bookings table -->
@@ -200,6 +211,8 @@ const router = useRouter()
 const bookings = ref<Booking[]>([])
 const loading = ref(true)
 const saving = ref(false)
+const calendarUrl = ref('')
+const copied = ref(false)
 
 const editTarget = ref<Booking | null>(null)
 const editError = ref('')
@@ -216,7 +229,24 @@ async function fetchBookings() {
   loading.value = false
 }
 
-onMounted(fetchBookings)
+async function fetchCalendarUrl() {
+  const res = await fetch('/api/calendar.ics/url', { headers: auth.authHeaders() })
+  if (res.ok) {
+    const data = await res.json()
+    calendarUrl.value = data.url
+  }
+}
+
+async function copyCalendarUrl() {
+  await navigator.clipboard.writeText(calendarUrl.value)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
+}
+
+onMounted(() => {
+  fetchBookings()
+  fetchCalendarUrl()
+})
 
 function formatDate(str: string) {
   const [y, m, d] = str.split('-').map(Number)

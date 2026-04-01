@@ -1,8 +1,19 @@
 import { Router } from 'express'
 import db from '../db.js'
 import logger from '../logger.js'
+import { requireAdmin } from '../middleware/auth.js'
 
 const router = Router()
+
+// GET /api/calendar.ics/url — returns the full subscribable URL (admin only)
+router.get('/url', requireAdmin, (req, res) => {
+  const appUrl = process.env.APP_URL ?? `${req.protocol}://${req.headers.host}`
+  const token = process.env.CALENDAR_TOKEN
+  const url = token
+    ? `${appUrl}/api/calendar.ics?token=${token}`
+    : `${appUrl}/api/calendar.ics`
+  res.json({ url })
+})
 
 function toIcsDate(dateStr: string): string {
   // dateStr is YYYY-MM-DD — convert to iCal all-day format YYYYMMDD

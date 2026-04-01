@@ -97,5 +97,6 @@ export default {
     saving: 'Speichern…',
     deleteTitle: 'Buchung löschen?',
     deleting: 'Löschen…',
+    calendarCopy: 'Kalender-URL kopieren',
   },
 }
