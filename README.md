@@ -95,8 +95,8 @@ Drop a `bg.jpg` into the `data/` folder — it is served automatically with no r
 ### Development
 
 ```bash
-git clone https://github.com/yourname/cabin-reserve.git
-cd cabin-reserve
+git clone https://github.com/yourname/simple-booking-app.git 
+cd simple-booking-app
 npm install
 cp .env.example .env   # then fill in your values
 npm run dev
@@ -169,9 +169,9 @@ pm2 restart cabin
 
 **1. Clone the repo on the server:**
 ```bash
-mkdir ~/simple-booking-app
-git clone (https://github.com/Alex-Klein/simple-booking-app.git ~/simple-booking-app
-cd ~/simple-booking-app
+
+git clone https://github.com/Alex-Klein/simple-booking-app.git ~/simple-booking-app
+cd simple-booking-app
 ```
 
 **2. Create the `.env` file:**
