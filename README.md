@@ -32,6 +32,18 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 
 ---
 
+## Screenshots
+
+| Home | Booking |
+|---|---|
+| ![Home](assets/home.jpg) | ![Booking](assets/booking.jpg) |
+
+| Dark mode | Admin dashboard |
+|---|---|
+| ![Dark mode](assets/darkmode.jpg) | ![Admin](assets/admin.png) |
+
+---
+
 ## Tech stack
 
 | Layer | Technology |
