@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import logger from './logger.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -89,8 +90,8 @@ export async function sendBookingEmails(booking: BookingDetails) {
   ])
 
   results.forEach((r, i) => {
-    if (r.error) console.error(`Email ${i} failed:`, r.error)
-    else console.log(`Email ${i} sent:`, r.data?.id)
+    if (r.error) logger.error({ err: r.error }, `Email ${i} (booking confirmation) failed`)
+    else logger.info({ emailId: r.data?.id }, `Email ${i} (booking confirmation) sent`)
   })
 }
 
@@ -121,8 +122,8 @@ export async function sendDeclineEmail(booking: { name: string; email: string; c
     html,
   })
 
-  if (result.error) console.error('Decline email failed:', result.error)
-  else console.log('Decline email sent:', result.data?.id)
+  if (result.error) logger.error({ err: result.error }, 'Decline email failed')
+  else logger.info({ emailId: result.data?.id }, 'Decline email sent')
 }
 
 export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
@@ -177,7 +178,7 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
   ])
 
   results.forEach((r, i) => {
-    if (r.error) console.error(`Email ${i} failed:`, r.error)
-    else console.log(`Email ${i} sent:`, r.data?.id)
+    if (r.error) logger.error({ err: r.error }, `Email ${i} (pending notification) failed`)
+    else logger.info({ emailId: r.data?.id }, `Email ${i} (pending notification) sent`)
   })
 }
