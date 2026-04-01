@@ -43,8 +43,7 @@
 
       <VDatePicker
         ref="pickerRef"
-        :model-value="dateRange"
-        @update:model-value="onRangeUpdate"
+        v-model.range="dateRange"
         :min-date="today"
         :disabled-dates="disabledDates"
         :attributes="calendarAttributes"
@@ -274,16 +273,18 @@ const calendarAttributes = computed(() => [
 ])
 
 // --- Date range binding ---
-// Computed so the calendar always reflects store state (e.g. on back-navigation).
-const dateRange = computed(() => ({ start: store.checkIn, end: store.checkOut }))
-
-function onRangeUpdate(val: { start: Date; end: Date } | null) {
-  if (val?.start && val?.end) {
-    store.setDates(val.start, val.end)
-  } else {
-    store.clearDates()
-  }
-}
+// Writable computed: v-model.range reads from the store (stays in sync on back-nav)
+// and writes directly to the store on every v-calendar emit — no watch needed.
+const dateRange = computed({
+  get: () => ({ start: store.checkIn, end: store.checkOut }),
+  set: (val: { start: Date; end: Date } | null) => {
+    if (val?.start && val?.end) {
+      store.setDates(val.start, val.end)
+    } else {
+      store.clearDates()
+    }
+  },
+})
 
 // --- Form ---
 const error = ref('')
