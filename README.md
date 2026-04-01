@@ -9,7 +9,7 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 ### For guests
 - **Availability calendar** — color-coded per person, showing who has booked which dates; pending (unconfirmed) bookings are shown with a striped pattern so they are visually distinct
 - **Multi-step booking form** — pick dates, fill in name, email, guest count and optional notes
-- **Minimum stay** of 2 nights enforced on the frontend
+- **Minimum stay** enforced on both frontend and backend — configurable via `VITE_MIN_STAY` / `MIN_STAY` (default: 2 nights)
 - **Email notification** on submission — guests receive a "request received" email immediately, and a confirmation or decline email once the admin acts
 - **Self-service cancellation** — every confirmation email contains a personal cancel link; no account needed
 - **Trusted email allowlist** — email addresses listed in `TRUSTED_EMAILS` are auto-confirmed without admin review

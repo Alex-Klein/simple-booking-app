@@ -29,6 +29,13 @@ router.post('/', (req, res) => {
     return
   }
 
+  const minStay = parseInt(process.env.MIN_STAY ?? '2', 10)
+  const nights = (new Date(check_out).getTime() - new Date(check_in).getTime()) / 86400000
+  if (nights < minStay) {
+    res.status(400).json({ error: `Minimum stay is ${minStay} nights` })
+    return
+  }
+
   // Check for overlap with existing bookings
   const overlap = db.prepare(`
     SELECT id FROM bookings

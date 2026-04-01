@@ -276,8 +276,9 @@ function submit() {
     error.value = t('book.errors.noDates')
     return
   }
-  if (store.nights < 2) {
-    error.value = t('book.errors.minStay')
+  const minStay = parseInt(import.meta.env.VITE_MIN_STAY ?? '2', 10)
+  if (store.nights < minStay) {
+    error.value = t('book.errors.minStay', { n: minStay })
     return
   }
   if (!store.guestInfo.name.trim()) {

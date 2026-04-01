@@ -37,7 +37,7 @@ export default {
     reviewBtn: 'Buchung prüfen',
     errors: {
       noDates: 'Bitte Anreise- und Abreisedatum auswählen.',
-      minStay: 'Mindestaufenthalt: 2 Nächte.',
+      minStay: 'Mindestaufenthalt: {n} Nächte.',
       noName: 'Bitte Name eingeben.',
       noEmail: 'Bitte gültige E-Mail-Adresse eingeben.',
     },

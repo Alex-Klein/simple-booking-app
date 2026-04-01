@@ -4,6 +4,7 @@ services:
       context: .
       args:
         VITE_APP_NAME: ${VITE_APP_NAME}
+        VITE_MIN_STAY: ${VITE_MIN_STAY:-2}
     volumes:
       - ./data:/data
     env_file: .env

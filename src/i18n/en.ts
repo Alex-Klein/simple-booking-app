@@ -37,7 +37,7 @@ export default {
     reviewBtn: 'Review Booking',
     errors: {
       noDates: 'Please select check-in and check-out dates.',
-      minStay: 'Minimum stay is 2 nights.',
+      minStay: 'Minimum stay is {n} nights.',
       noName: 'Please enter your name.',
       noEmail: 'Please enter a valid email address.',
     },
