@@ -169,8 +169,9 @@ pm2 restart cabin
 
 **1. Clone the repo on the server:**
 ```bash
-git clone https://github.com/yourname/cabin-reserve.git /srv/cabin
-cd /srv/cabin
+mkdir ~/simple-booking-app
+git clone (https://github.com/Alex-Klein/simple-booking-app.git ~/simple-booking-app
+cd ~/simple-booking-app
 ```
 
 **2. Create the `.env` file:**
