@@ -11,8 +11,9 @@ COPY . .
 ARG VITE_APP_NAME
 ENV VITE_APP_NAME=${VITE_APP_NAME}
 
-ARG VITE_MIN_STAY=2
-ENV VITE_MIN_STAY=${VITE_MIN_STAY}
+# Single MIN_STAY value — mapped to VITE_MIN_STAY so Vite picks it up at build time
+ARG MIN_STAY=2
+ENV VITE_MIN_STAY=${MIN_STAY}
 
 # Build the Vue frontend
 RUN npm run build
