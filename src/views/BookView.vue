@@ -156,8 +156,14 @@ function localDate(str: string): Date {
 }
 
 // --- Disabled dates (blocks selection) ---
+// Range ends at check_out - 1 so the checkout date is selectable as a new check-in.
+// (back-to-back bookings: guest A checks out on day X, guest B can check in on day X)
 const disabledDates = computed(() =>
-  store.bookedPeriods.map((p) => ({ start: localDate(p.check_in), end: localDate(p.check_out) }))
+  store.bookedPeriods.map((p) => {
+    const end = localDate(p.check_out)
+    end.setDate(end.getDate() - 1)
+    return { start: localDate(p.check_in), end }
+  })
 )
 
 // --- Weekend dates ---
@@ -228,13 +234,26 @@ const calendarAttributes = computed(() => [
   ...store.bookedPeriods.flatMap((p) => {
     const color = personColors.value.get(p.email) ?? 'red'
     const isPending = p.status === 'pending'
+    // Highlight covers only the booked nights (check_in to check_out - 1)
+    const highlightEnd = localDate(p.check_out)
+    highlightEnd.setDate(highlightEnd.getDate() - 1)
     return [
       {
         key: `${p.id}-highlight`,
         highlight: isPending
           ? { color, fillMode: 'light', style: PENDING_STYLE }
           : { color, fillMode: 'light' },
-        dates: { start: localDate(p.check_in), end: localDate(p.check_out) },
+        dates: { start: localDate(p.check_in), end: highlightEnd },
+      },
+      {
+        // Checkout day: dot only — selectable as a new check-in
+        key: `${p.id}-checkout`,
+        dot: { color, fillMode: 'light' },
+        popover: {
+          label: `${firstNameOf(p.name)} checks out`,
+          visibility: 'hover',
+        },
+        dates: localDate(p.check_out),
       },
       {
         key: `${p.id}-label`,
@@ -261,7 +280,7 @@ watch(dateRange, (val) => {
   } else {
     store.clearDates()
   }
-})
+}, { deep: true })
 
 // --- Form ---
 const error = ref('')
