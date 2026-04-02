@@ -43,19 +43,19 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const appName = import.meta.env.VITE_APP_NAME ?? 'Simple Booking App'
-
-const rawImages = (import.meta.env.VITE_BG_IMAGES ?? '/bg.jpg')
-  .split(',').map((s: string) => s.trim()).filter(Boolean)
-const images = rawImages.length ? rawImages : ['/bg.jpg']
 const interval = parseInt(import.meta.env.VITE_BG_INTERVAL ?? '6000', 10)
 
+const images = ref<string[]>(['/bg.jpg'])
 const activeIndex = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
-onMounted(() => {
-  if (images.length > 1) {
+onMounted(async () => {
+  const res = await fetch('/api/backgrounds')
+  if (res.ok) images.value = await res.json()
+
+  if (images.value.length > 1) {
     timer = setInterval(() => {
-      activeIndex.value = (activeIndex.value + 1) % images.length
+      activeIndex.value = (activeIndex.value + 1) % images.value.length
     }, interval)
   }
 })

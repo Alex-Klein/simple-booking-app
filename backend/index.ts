@@ -54,6 +54,24 @@ app.get('/bg.jpg', (req, res) => {
   }
 })
 
+// Serve slideshow images from data/backgrounds/
+const BG_DIR = path.join(DATA_DIR, 'backgrounds')
+fs.mkdirSync(BG_DIR, { recursive: true })
+app.use('/backgrounds', express.static(BG_DIR))
+
+// List available background images
+const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp'])
+app.get('/api/backgrounds', (_req, res) => {
+  const files = fs.readdirSync(BG_DIR)
+    .filter(f => IMAGE_EXTS.has(path.extname(f).toLowerCase()))
+    .sort()
+  if (files.length === 0) {
+    res.json(['/bg.jpg'])
+  } else {
+    res.json(files.map(f => `/backgrounds/${f}`))
+  }
+})
+
 if (process.env.NODE_ENV === 'production') {
   const distPath = path.join(__dirname, '../dist')
   app.use(express.static(distPath))
