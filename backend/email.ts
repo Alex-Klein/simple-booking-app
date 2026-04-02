@@ -85,55 +85,102 @@ function formatDate(str: string, locale?: string) {
   })
 }
 
+// ─── Shared layout ────────────────────────────────────────────────────────────
+
+function layout(body: string) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f1ed;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ed;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+
+        <!-- Header -->
+        <tr><td style="background:#4a6741;border-radius:12px 12px 0 0;padding:28px 32px;text-align:center;">
+          <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">${APP_NAME}</p>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="background:#ffffff;padding:36px 32px;border-left:1px solid #e5ddd4;border-right:1px solid #e5ddd4;">
+          ${body}
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background:#f9f6f2;border:1px solid #e5ddd4;border-top:none;border-radius:0 0 12px 12px;padding:16px 32px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#a89880;">${APP_NAME}</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+}
+
+function detailsTable(rows: { label: string; value: string; bold?: boolean }[]) {
+  const cells = rows.map((r, i) => `
+    <tr style="background:${i % 2 === 0 ? '#f9f6f2' : '#ffffff'};">
+      <td style="padding:12px 16px;font-size:13px;color:#7a6a5a;white-space:nowrap;width:110px;">${r.label}</td>
+      <td style="padding:12px 16px;font-size:14px;color:#1a1a1a;${r.bold ? 'font-weight:600;' : ''}">${r.value}</td>
+    </tr>`).join('')
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-radius:8px;overflow:hidden;border:1px solid #e5ddd4;margin:24px 0;">
+    ${cells}
+  </table>`
+}
+
+function primaryBtn(href: string, label: string, color = '#4a6741') {
+  return `<table cellpadding="0" cellspacing="0" style="margin-top:24px;">
+    <tr><td style="background:${color};border-radius:8px;">
+      <a href="${href}" style="display:inline-block;padding:12px 28px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">${label}</a>
+    </td></tr>
+  </table>`
+}
+
+// ─── Email senders ─────────────────────────────────────────────────────────────
+
 export async function sendBookingEmails(booking: BookingDetails) {
   const { name, email, notes, check_in, check_out, cancelUrl, locale } = booking
   const tr = t(locale)
   const checkIn = formatDate(check_in, locale)
   const checkOut = formatDate(check_out, locale)
 
-  const bookerHtml = `
-    <h2>${tr.confirmTitle(APP_NAME)}</h2>
-    <p>${tr.confirmIntro(name)}</p>
-    <p>${tr.confirmBody}</p>
-    <table style="border-collapse:collapse;width:100%;max-width:400px">
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckIn}</td><td style="padding:8px 0;font-weight:bold">${checkIn}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckOut}</td><td style="padding:8px 0;font-weight:bold">${checkOut}</td></tr>
-      ${notes ? `<tr><td style="padding:8px 0;color:#888">${tr.labelNotes}</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
-    </table>
-    <p style="margin-top:24px;color:#666">${tr.confirmClosing}</p>
-    ${cancelUrl ? `
-    <hr style="margin:32px 0;border:none;border-top:1px solid #eee" />
-    <p style="color:#999;font-size:13px">${tr.cancelNote}</p>
-    <a href="${cancelUrl}" style="display:inline-block;margin-top:8px;padding:10px 24px;background:#ef4444;color:white;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
-      ${tr.cancelBtn}
-    </a>
-    ` : ''}
-  `
+  const rows = [
+    { label: tr.labelCheckIn, value: checkIn, bold: true },
+    { label: tr.labelCheckOut, value: checkOut, bold: true },
+    ...(notes ? [{ label: tr.labelNotes, value: `<em>${notes}</em>` }] : []),
+  ]
 
-  const adminHtml = `
-    <h2>New booking at ${APP_NAME}</h2>
-    <table style="border-collapse:collapse;width:100%;max-width:400px">
-      <tr><td style="padding:8px 0;color:#888">Who</td><td style="padding:8px 0;font-weight:bold">${name} (${email})</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0">${formatDate(check_in)}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0">${formatDate(check_out)}</td></tr>
-      ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
-    </table>
-  `
+  const bookerHtml = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">${tr.confirmTitle(APP_NAME)}</h1>
+    <p style="margin:0 0 4px;font-size:15px;color:#3a3a3a;">${tr.confirmIntro(name)}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">${tr.confirmBody}</p>
+    ${detailsTable(rows)}
+    <p style="margin:24px 0 0;font-size:14px;color:#6b6b6b;">${tr.confirmClosing}</p>
+    ${cancelUrl ? `
+    <hr style="margin:32px 0;border:none;border-top:1px solid #ede8e0;" />
+    <p style="margin:0 0 8px;font-size:13px;color:#a89880;">${tr.cancelNote}</p>
+    ${primaryBtn(cancelUrl, tr.cancelBtn, '#dc2626')}
+    ` : ''}
+  `)
+
+  const adminRows = [
+    { label: 'Guest', value: `${name} &lt;${email}&gt;`, bold: true },
+    { label: 'Check-in', value: formatDate(check_in), bold: true },
+    { label: 'Check-out', value: formatDate(check_out), bold: true },
+    ...(notes ? [{ label: 'Notes', value: `<em>${notes}</em>` }] : []),
+  ]
+
+  const adminHtml = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">New booking at ${APP_NAME}</h1>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">A new reservation has been confirmed.</p>
+    ${detailsTable(adminRows)}
+  `)
 
   const results = await Promise.all([
-    resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: tr.confirmSubject(APP_NAME, checkIn),
-      html: bookerHtml,
-    }),
+    resend.emails.send({ from: FROM, to: email, subject: tr.confirmSubject(APP_NAME, checkIn), html: bookerHtml }),
     ...(ADMIN && ADMIN !== email
-      ? [resend.emails.send({
-          from: FROM,
-          to: ADMIN,
-          subject: `New booking by ${name} — ${formatDate(check_in)}`,
-          html: adminHtml,
-        })]
+      ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `New booking by ${name} — ${formatDate(check_in)}`, html: adminHtml })]
       : []),
   ])
 
@@ -149,27 +196,26 @@ export async function sendDeclineEmail(booking: { name: string; email: string; c
   const checkIn = formatDate(check_in, locale)
   const checkOut = formatDate(check_out, locale)
 
-  const html = `
-    <h2>${tr.declineTitle}</h2>
-    <p>${tr.confirmIntro(name)}</p>
-    <p>${tr.declineBody(APP_NAME)}</p>
-    <table style="border-collapse:collapse;width:100%;max-width:400px">
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckIn}</td><td style="padding:8px 0;font-weight:bold">${checkIn}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckOut}</td><td style="padding:8px 0;font-weight:bold">${checkOut}</td></tr>
-    </table>
-    ${reason ? `
-    <div style="margin-top:20px;padding:12px 16px;background:#fef2f2;border-left:3px solid #ef4444;border-radius:4px">
-      <p style="margin:0;color:#7f1d1d;font-size:14px"><strong>${tr.declineReason}</strong> ${reason}</p>
-    </div>` : ''}
-    <p style="margin-top:24px;color:#666">${tr.declineClosing}</p>
-  `
+  const rows = [
+    { label: tr.labelCheckIn, value: checkIn, bold: true },
+    { label: tr.labelCheckOut, value: checkOut, bold: true },
+  ]
 
-  const result = await resend.emails.send({
-    from: FROM,
-    to: email,
-    subject: tr.declineSubject(APP_NAME, checkIn),
-    html,
-  })
+  const html = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">${tr.declineTitle}</h1>
+    <p style="margin:0 0 4px;font-size:15px;color:#3a3a3a;">${tr.confirmIntro(name)}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">${tr.declineBody(APP_NAME)}</p>
+    ${detailsTable(rows)}
+    ${reason ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;">
+      <tr><td style="background:#fef2f2;border-left:3px solid #dc2626;border-radius:4px;padding:12px 16px;font-size:14px;color:#7f1d1d;">
+        <strong>${tr.declineReason}</strong> ${reason}
+      </td></tr>
+    </table>` : ''}
+    <p style="margin:24px 0 0;font-size:14px;color:#6b6b6b;">${tr.declineClosing}</p>
+  `)
+
+  const result = await resend.emails.send({ from: FROM, to: email, subject: tr.declineSubject(APP_NAME, checkIn), html })
 
   if (result.error) logger.error({ err: result.error }, 'Decline email failed')
   else logger.info({ emailId: result.data?.id }, 'Decline email sent')
@@ -181,47 +227,38 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
   const checkIn = formatDate(check_in, locale)
   const checkOut = formatDate(check_out, locale)
 
-  const bookerHtml = `
-    <h2>${tr.pendingGuestTitle}</h2>
-    <p>${tr.confirmIntro(name)}</p>
-    <p>${tr.pendingGuestBody(APP_NAME)}</p>
-    <table style="border-collapse:collapse;width:100%;max-width:400px">
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckIn}</td><td style="padding:8px 0;font-weight:bold">${checkIn}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">${tr.labelCheckOut}</td><td style="padding:8px 0;font-weight:bold">${checkOut}</td></tr>
-      ${notes ? `<tr><td style="padding:8px 0;color:#888">${tr.labelNotes}</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
-    </table>
-    <p style="margin-top:24px;color:#666">${tr.pendingGuestClosing}</p>
-  `
+  const rows = [
+    { label: tr.labelCheckIn, value: checkIn, bold: true },
+    { label: tr.labelCheckOut, value: checkOut, bold: true },
+    ...(notes ? [{ label: tr.labelNotes, value: `<em>${notes}</em>` }] : []),
+  ]
 
-  const adminHtml = `
-    <h2>New booking request at ${APP_NAME} (pending approval)</h2>
-    <table style="border-collapse:collapse;width:100%;max-width:400px">
-      <tr><td style="padding:8px 0;color:#888">Who</td><td style="padding:8px 0;font-weight:bold">${name} (${email})</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0">${formatDate(check_in)}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0">${formatDate(check_out)}</td></tr>
-      ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
-    </table>
-    <p style="margin-top:24px">
-      <a href="${appUrl}/admin" style="display:inline-block;padding:10px 24px;background:#5a7c5a;color:white;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
-        Review in Admin Panel
-      </a>
-    </p>
-  `
+  const bookerHtml = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">${tr.pendingGuestTitle}</h1>
+    <p style="margin:0 0 4px;font-size:15px;color:#3a3a3a;">${tr.confirmIntro(name)}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">${tr.pendingGuestBody(APP_NAME)}</p>
+    ${detailsTable(rows)}
+    <p style="margin:24px 0 0;font-size:14px;color:#6b6b6b;">${tr.pendingGuestClosing}</p>
+  `)
+
+  const adminRows = [
+    { label: 'Guest', value: `${name} &lt;${email}&gt;`, bold: true },
+    { label: 'Check-in', value: formatDate(check_in), bold: true },
+    { label: 'Check-out', value: formatDate(check_out), bold: true },
+    ...(notes ? [{ label: 'Notes', value: `<em>${notes}</em>` }] : []),
+  ]
+
+  const adminHtml = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">New booking request at ${APP_NAME}</h1>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">A new request is waiting for your approval.</p>
+    ${detailsTable(adminRows)}
+    ${primaryBtn(`${appUrl}/admin`, 'Review in Admin Panel')}
+  `)
 
   const results = await Promise.all([
-    resend.emails.send({
-      from: FROM,
-      to: email,
-      subject: tr.pendingGuestSubject(APP_NAME, checkIn),
-      html: bookerHtml,
-    }),
+    resend.emails.send({ from: FROM, to: email, subject: tr.pendingGuestSubject(APP_NAME, checkIn), html: bookerHtml }),
     ...(ADMIN && ADMIN !== email
-      ? [resend.emails.send({
-          from: FROM,
-          to: ADMIN,
-          subject: `Booking request by ${name} — ${formatDate(check_in)} (awaiting approval)`,
-          html: adminHtml,
-        })]
+      ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `Booking request by ${name} — ${formatDate(check_in)} (awaiting approval)`, html: adminHtml })]
       : []),
   ])
 
