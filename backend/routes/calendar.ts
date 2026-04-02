@@ -20,6 +20,18 @@ function toIcsDate(dateStr: string): string {
   return dateStr.replace(/-/g, '')
 }
 
+function toIcsDatePlusOne(dateStr: string): string {
+  // iCal DTEND for all-day events is exclusive, so we add 1 day to make
+  // the checkout day visually included in the event. For back-to-back bookings
+  // the shared day will appear in both events, accurately reflecting the handoff.
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const next = new Date(y, m - 1, d + 1)
+  const yy = next.getFullYear()
+  const mm = String(next.getMonth() + 1).padStart(2, '0')
+  const dd = String(next.getDate()).padStart(2, '0')
+  return `${yy}${mm}${dd}`
+}
+
 function toIcsTimestamp(date: Date): string {
   return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
 }
@@ -53,7 +65,7 @@ router.get('/', (req, res) => {
       `UID:booking-${b.id}@cabin`,
       `DTSTAMP:${now}`,
       `DTSTART;VALUE=DATE:${toIcsDate(b.check_in)}`,
-      `DTEND;VALUE=DATE:${toIcsDate(b.check_out)}`,
+      `DTEND;VALUE=DATE:${toIcsDatePlusOne(b.check_out)}`,
       `SUMMARY:${summary}`,
       description ? `DESCRIPTION:${description}` : null,
       `URL:${appUrl}`,
