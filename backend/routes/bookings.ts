@@ -64,7 +64,7 @@ router.post('/', (req, res) => {
 
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(result.lastInsertRowid) as any
 
-  const appUrl = process.env.APP_URL ?? 'http://localhost:5173'
+  const appUrl = (process.env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '')
   const cancelUrl = `${appUrl}/cancel?token=${cancel_token}`
 
   if (status === 'confirmed') {
