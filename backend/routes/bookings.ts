@@ -14,9 +14,15 @@ function getTrustedEmails(): string[] {
     .filter(Boolean)
 }
 
-// GET /api/bookings — all bookings
+// GET /api/bookings — active bookings (pending + confirmed)
 router.get('/', (_req, res) => {
-  const bookings = db.prepare('SELECT * FROM bookings ORDER BY check_in ASC').all()
+  const bookings = db.prepare("SELECT * FROM bookings WHERE status IN ('pending', 'confirmed') ORDER BY check_in ASC").all()
+  res.json(bookings)
+})
+
+// GET /api/bookings/history — declined and cancelled bookings (admin only)
+router.get('/history', requireAdmin, (_req, res) => {
+  const bookings = db.prepare("SELECT * FROM bookings WHERE status IN ('declined', 'cancelled') ORDER BY check_in DESC").all()
   res.json(bookings)
 })
 
@@ -119,7 +125,7 @@ router.post('/:id/decline', requireAdmin, (req, res) => {
     return
   }
 
-  db.prepare('DELETE FROM bookings WHERE id = ?').run(id)
+  db.prepare("UPDATE bookings SET status = 'declined', declined_reason = ? WHERE id = ?").run(reason || null, id)
 
   const { name, email, check_in, check_out, locale: bookingLocale } = booking
   sendDeclineEmail({ name, email, check_in, check_out, reason: reason || undefined, locale: bookingLocale ?? 'en' }).catch((err) =>
@@ -168,7 +174,7 @@ router.delete('/:id', requireAdmin, (req, res) => {
     return
   }
 
-  db.prepare('DELETE FROM bookings WHERE id = ?').run(id)
+  db.prepare("UPDATE bookings SET status = 'cancelled' WHERE id = ?").run(id)
   res.status(204).send()
 })
 

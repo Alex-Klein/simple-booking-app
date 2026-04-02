@@ -97,6 +97,57 @@
       </div>
     </div>
 
+    <!-- History -->
+    <div class="mt-10">
+      <button
+        @click="historyOpen = !historyOpen"
+        class="flex items-center gap-2 text-cabin-500 dark:text-gray-400 hover:text-cabin-700 dark:hover:text-gray-200 text-sm font-medium transition-colors"
+      >
+        <svg class="w-4 h-4 transition-transform" :class="historyOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+        {{ t('admin.historyTitle') }}
+        <span v-if="history.length" class="bg-cabin-100 dark:bg-gray-700 text-cabin-500 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full">{{ history.length }}</span>
+      </button>
+
+      <div v-if="historyOpen" class="mt-4 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-cabin-100 dark:border-gray-700 overflow-hidden">
+        <div v-if="history.length === 0" class="p-8 text-center text-cabin-400 dark:text-gray-500 text-sm">{{ t('admin.historyEmpty') }}</div>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-cabin-50 dark:bg-gray-700 text-cabin-500 dark:text-gray-400 uppercase text-xs tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">{{ t('admin.colName') }}</th>
+                <th class="px-4 py-3 text-left">{{ t('admin.colEmail') }}</th>
+                <th class="px-4 py-3 text-left">{{ t('admin.colCheckIn') }}</th>
+                <th class="px-4 py-3 text-left">{{ t('admin.colCheckOut') }}</th>
+                <th class="px-4 py-3 text-left">{{ t('admin.colStatus') }}</th>
+                <th class="px-4 py-3 text-left">{{ t('admin.colReason') }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-cabin-50 dark:divide-gray-700">
+              <tr v-for="b in history" :key="b.id" class="opacity-60">
+                <td class="px-4 py-3 font-medium text-cabin-800 dark:text-gray-100">{{ b.name }}</td>
+                <td class="px-4 py-3 text-cabin-600 dark:text-gray-300">{{ b.email }}</td>
+                <td class="px-4 py-3 dark:text-gray-300">{{ formatDate(b.check_in) }}</td>
+                <td class="px-4 py-3 dark:text-gray-300">{{ formatDate(b.check_out) }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    :class="b.status === 'declined'
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                    class="px-2 py-0.5 rounded-full text-xs font-medium"
+                  >
+                    {{ b.status === 'declined' ? t('admin.statusDeclined') : t('admin.statusCancelled') }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-cabin-500 dark:text-gray-400 italic text-xs">{{ b.declined_reason || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Edit modal -->
     <div v-if="editTarget" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -195,12 +246,15 @@ interface Booking {
   check_out: string
   created_at: string
   status: string
+  declined_reason?: string
 }
 
 const { t } = useI18n()
 const auth = useAuthStore()
 const router = useRouter()
 const bookings = ref<Booking[]>([])
+const history = ref<Booking[]>([])
+const historyOpen = ref(false)
 const loading = ref(true)
 const saving = ref(false)
 const calendarUrl = ref('')
@@ -216,8 +270,12 @@ const declineReason = ref('')
 
 async function fetchBookings() {
   loading.value = true
-  const res = await fetch('/api/bookings', { headers: auth.authHeaders() })
-  bookings.value = await res.json()
+  const [activeRes, historyRes] = await Promise.all([
+    fetch('/api/bookings', { headers: auth.authHeaders() }),
+    fetch('/api/bookings/history', { headers: auth.authHeaders() }),
+  ])
+  bookings.value = await activeRes.json()
+  history.value = await historyRes.json()
   loading.value = false
 }
 

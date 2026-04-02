@@ -96,5 +96,10 @@ export default {
     deleting: 'Löschen…',
     calendarSubscribe: 'Kalender abonnieren:',
     calendarCopy: 'Kalender-URL kopieren',
+    historyTitle: 'Verlauf',
+    historyEmpty: 'Keine abgelehnten oder stornierten Buchungen.',
+    statusDeclined: 'Abgelehnt',
+    statusCancelled: 'Storniert',
+    colReason: 'Grund',
   },
 }

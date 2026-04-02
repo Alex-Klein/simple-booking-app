@@ -44,6 +44,10 @@ if (!cols.includes('status')) {
 if (!cols.includes('locale')) {
   db.exec("ALTER TABLE bookings ADD COLUMN locale TEXT NOT NULL DEFAULT 'en'")
 }
+// Add declined_reason column for booking history
+if (!cols.includes('declined_reason')) {
+  db.exec("ALTER TABLE bookings ADD COLUMN declined_reason TEXT")
+}
 
 
 export default db

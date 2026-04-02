@@ -96,5 +96,10 @@ export default {
     deleting: 'Deleting…',
     calendarSubscribe: 'Subscribe to your local calendar:',
     calendarCopy: 'Copy calendar URL',
+    historyTitle: 'History',
+    historyEmpty: 'No declined or cancelled bookings.',
+    statusDeclined: 'Declined',
+    statusCancelled: 'Cancelled',
+    colReason: 'Reason',
   },
 }
