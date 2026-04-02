@@ -4,7 +4,7 @@
 
 - [x] **Nights count missing number** — fixed
 - [x] **Verify back-to-back visuals** — confirmed working on prod
-- [ ] **Existing bookings off by one day** — the UTC→local timezone fix may have shifted dates for bookings made before the fix; worth a manual check
+- [x] **Existing bookings off by one day** — only test data, no action needed
 
 ## Features
 
