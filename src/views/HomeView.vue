@@ -2,7 +2,13 @@
   <div>
     <!-- Hero -->
     <section class="relative h-screen bg-cabin-900 flex items-center justify-center overflow-hidden">
-      <div class="absolute inset-0 bg-cover bg-center opacity-50" :style="{ backgroundImage: 'url(/bg.jpg)' }" />
+      <!-- Background images with crossfade -->
+      <div
+        v-for="(img, i) in images"
+        :key="img"
+        class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+        :style="{ backgroundImage: `url(${img})`, opacity: i === activeIndex ? 0.5 : 0 }"
+      />
       <div class="relative text-center text-white px-4">
         <h1 class="text-5xl font-serif mb-4 drop-shadow-lg">{{ appName }}</h1>
         <p class="text-xl text-cabin-100 mb-8 drop-shadow">{{ t('home.subtitle') }}</p>
@@ -30,10 +36,31 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const appName = import.meta.env.VITE_APP_NAME ?? 'Simple Booking App'
+
+const rawImages = (import.meta.env.VITE_BG_IMAGES ?? '/bg.jpg')
+  .split(',').map((s: string) => s.trim()).filter(Boolean)
+const images = rawImages.length ? rawImages : ['/bg.jpg']
+const interval = parseInt(import.meta.env.VITE_BG_INTERVAL ?? '6000', 10)
+
+const activeIndex = ref(0)
+let timer: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  if (images.length > 1) {
+    timer = setInterval(() => {
+      activeIndex.value = (activeIndex.value + 1) % images.length
+    }, interval)
+  }
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 </script>
