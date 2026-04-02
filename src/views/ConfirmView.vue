@@ -79,7 +79,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '../stores/booking'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useBookingStore()
 const router = useRouter()
 const confirmed = ref(false)
@@ -98,7 +98,7 @@ function formatDate(d: Date) {
 async function confirm() {
   submitting.value = true
   error.value = ''
-  const result = await store.createBooking()
+  const result = await store.createBooking(locale.value)
   submitting.value = false
   if (result.ok) {
     bookingStatus.value = result.status ?? 'confirmed'

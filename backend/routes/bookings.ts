@@ -22,7 +22,7 @@ router.get('/', (_req, res) => {
 
 // POST /api/bookings — create a booking
 router.post('/', (req, res) => {
-  const { name, email, notes, check_in, check_out } = req.body
+  const { name, email, notes, check_in, check_out, locale } = req.body
 
   if (!name || !email || !check_in || !check_out) {
     res.status(400).json({ error: 'name, email, check_in and check_out are required' })
@@ -63,12 +63,12 @@ router.post('/', (req, res) => {
 
   if (status === 'confirmed') {
     // Auto-confirmed: send regular confirmation email
-    sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl }).catch((err) =>
+    sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl, locale }).catch((err) =>
       logger.error({ err, bookingId: booking.id }, 'Confirmation email failed')
     )
   } else {
     // Pending: notify guest their request was received, notify admin to approve
-    sendPendingBookingEmails({ name, email, notes, check_in, check_out, appUrl }).catch((err) =>
+    sendPendingBookingEmails({ name, email, notes, check_in, check_out, appUrl, locale }).catch((err) =>
       logger.error({ err, bookingId: booking.id }, 'Pending notification email failed')
     )
   }
@@ -96,7 +96,7 @@ router.post('/:id/confirm', requireAdmin, (req, res) => {
 
   const cancelUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/cancel?token=${booking.cancel_token}`
   const { name, email, notes, check_in, check_out } = booking
-  sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl }).catch((err) =>
+  sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl, locale: 'en' }).catch((err) =>
     logger.error({ err, bookingId: id }, 'Approval email failed')
   )
 

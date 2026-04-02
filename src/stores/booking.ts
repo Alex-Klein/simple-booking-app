@@ -40,7 +40,7 @@ export const useBookingStore = defineStore('booking', () => {
     bookedPeriods.value = await res.json()
   }
 
-  async function createBooking(): Promise<{ ok: boolean; status?: string; error?: string }> {
+  async function createBooking(locale = 'en'): Promise<{ ok: boolean; status?: string; error?: string }> {
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,6 +50,7 @@ export const useBookingStore = defineStore('booking', () => {
         notes: guestInfo.value.notes,
         check_in: toDateString(checkIn.value!),
         check_out: toDateString(checkOut.value!),
+        locale,
       }),
     })
     if (!res.ok) {
