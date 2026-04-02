@@ -147,7 +147,6 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
       <tr><td style="padding:8px 0;color:#888">Who</td><td style="padding:8px 0;font-weight:bold">${name} (${email})</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0">${checkIn}</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0">${checkOut}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Guests</td><td style="padding:8px 0">${guests}</td></tr>
       ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
     </table>
     <p style="margin-top:24px">
