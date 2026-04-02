@@ -62,7 +62,7 @@
           <span class="mx-2 text-cabin-400 dark:text-gray-500">→</span>
           <span class="font-medium">{{ formatDate(store.checkOut!) }}</span>
         </div>
-        <span class="font-semibold text-cabin-600 dark:text-cabin-400">{{ t('book.nights', store.nights) }}</span>
+        <span class="font-semibold text-cabin-600 dark:text-cabin-400">{{ store.nights }} {{ t('book.nights', store.nights) }}</span>
       </div>
       <p v-else class="text-sm text-cabin-400 dark:text-gray-500 text-center mt-2">{{ t('book.clickHint') }}</p>
     </section>

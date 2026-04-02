@@ -39,7 +39,7 @@
               <div class="font-semibold">{{ formatDate(store.checkOut!) }}</div>
             </div>
           </div>
-          <p class="text-sm text-cabin-500 dark:text-gray-400 mt-3">{{ t('book.nights', store.nights) }}</p>
+          <p class="text-sm text-cabin-500 dark:text-gray-400 mt-3">{{ store.nights }} {{ t('book.nights', store.nights) }}</p>
         </div>
 
         <div class="p-5">
