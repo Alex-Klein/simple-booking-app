@@ -179,9 +179,7 @@ export async function sendBookingEmails(booking: BookingDetails) {
 
   const results = await Promise.all([
     resend.emails.send({ from: FROM, to: email, subject: tr.confirmSubject(APP_NAME, checkIn), html: bookerHtml }),
-    ...(ADMIN && ADMIN !== email
-      ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `New booking by ${name} — ${formatDate(check_in)}`, html: adminHtml })]
-      : []),
+    ...(ADMIN ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `New booking by ${name} — ${formatDate(check_in)}`, html: adminHtml })] : []),
   ])
 
   results.forEach((r, i) => {
@@ -257,9 +255,7 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
 
   const results = await Promise.all([
     resend.emails.send({ from: FROM, to: email, subject: tr.pendingGuestSubject(APP_NAME, checkIn), html: bookerHtml }),
-    ...(ADMIN && ADMIN !== email
-      ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `Booking request by ${name} — ${formatDate(check_in)} (awaiting approval)`, html: adminHtml })]
-      : []),
+    ...(ADMIN ? [resend.emails.send({ from: FROM, to: ADMIN, subject: `Booking request by ${name} — ${formatDate(check_in)} (awaiting approval)`, html: adminHtml })] : []),
   ])
 
   results.forEach((r, i) => {

@@ -3,10 +3,10 @@ import db from '../db.js'
 
 const router = Router()
 
-// GET /api/cancel/:token — look up booking by token
+// GET /api/cancel/:token — look up booking by token (active bookings only)
 router.get('/:token', (req, res) => {
   const booking = db.prepare(
-    'SELECT id, name, email, check_in, check_out FROM bookings WHERE cancel_token = ?'
+    "SELECT id, name, email, check_in, check_out FROM bookings WHERE cancel_token = ? AND status IN ('pending', 'confirmed')"
   ).get(req.params.token)
 
   if (!booking) {
@@ -16,10 +16,10 @@ router.get('/:token', (req, res) => {
   res.json(booking)
 })
 
-// DELETE /api/cancel/:token — cancel booking by token
+// DELETE /api/cancel/:token — cancel booking by token (soft-delete)
 router.delete('/:token', (req, res) => {
   const booking = db.prepare(
-    'SELECT id FROM bookings WHERE cancel_token = ?'
+    "SELECT id FROM bookings WHERE cancel_token = ? AND status IN ('pending', 'confirmed')"
   ).get(req.params.token)
 
   if (!booking) {
@@ -27,7 +27,7 @@ router.delete('/:token', (req, res) => {
     return
   }
 
-  db.prepare('DELETE FROM bookings WHERE cancel_token = ?').run(req.params.token)
+  db.prepare("UPDATE bookings SET status = 'cancelled' WHERE cancel_token = ?").run(req.params.token)
   res.status(204).send()
 })
 
