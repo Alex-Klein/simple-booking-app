@@ -7,10 +7,10 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 ## Features
 
 ### For guests
-- **Availability calendar** — color-coded per person, showing who has booked which dates; pending (unconfirmed) bookings are shown with a striped pattern so they are visually distinct
-- **Multi-step booking form** — pick dates, fill in name, email, guest count and optional notes
+- **Availability calendar** — color-coded per person, showing who has booked which dates; pending (unconfirmed) bookings are shown with a striped pattern; back-to-back bookings share a boundary day with a split visual
+- **Multi-step booking form** — pick dates, fill in name, email and optional notes
 - **Minimum stay** enforced on both frontend and backend — configurable via `MIN_STAY` (default: 2 nights)
-- **Email notification** on submission — guests receive a "request received" email immediately, and a confirmation or decline email once the admin acts
+- **Branded email notifications** — guests receive a "request received" email immediately, and a confirmation or decline email once the admin acts; all emails are sent in the guest's language (EN/DE)
 - **Self-service cancellation** — every confirmation email contains a personal cancel link; no account needed
 - **Trusted email allowlist** — email addresses listed in `TRUSTED_EMAILS` are auto-confirmed without admin review
 - **Dark mode** support
@@ -20,13 +20,15 @@ A self-hosted booking system for a private cabin, chalet, or any shared space. G
 - **Password-protected dashboard** at `/admin`
 - **Approve or decline** pending bookings; when declining, an optional reason can be entered and is included in the email sent to the guest
 - **Edit or delete** any booking directly from the dashboard
+- **Booking history** — declined and cancelled bookings are preserved in a collapsible history section rather than deleted; decline reasons are shown
 - **Status badges** — bookings are shown as Pending (amber) or Confirmed (green)
-- **iCalendar feed** — subscribe to `/api/calendar.ics` in any calendar app for live sync; event titles support a configurable prefix via `CALENDAR_PREFIX`
+- **iCalendar feed** — subscribe to `/api/calendar.ics` in any calendar app for live sync; checkout day is included in each event so back-to-back bookings display correctly; event titles support a configurable prefix via `CALENDAR_PREFIX`
 
 ### Technical
-- Conflict detection — overlapping dates are rejected at the API level
-- Email delivery via [Resend](https://resend.com)
-- SQLite database — simple, zero-config, file-based; directory is auto-created on first deploy
+- Conflict detection — overlapping dates are rejected at the API level; back-to-back bookings sharing a checkout/check-in day are explicitly allowed
+- Locale persisted on each booking — admin-triggered emails (approve, decline) are always sent in the guest's original language
+- Email delivery via [Resend](https://resend.com) with configurable sender name (`FROM_NAME`)
+- SQLite database — simple, zero-config, file-based; schema migrations run automatically on startup
 - JWT-based admin authentication (7-day tokens)
 - Structured logging via [pino](https://getpino.io) — human-readable with timestamps and client IPs in all environments
 
@@ -77,6 +79,9 @@ ADMIN_EMAIL=admin@example.com
 # The "from" address on all outgoing emails
 FROM_EMAIL=noreply@yourcabin.com
 
+# Friendly sender name shown in email clients (defaults to APP_NAME if not set)
+FROM_NAME=My Cabin
+
 # Password for the /admin dashboard
 ADMIN_PASSWORD=changeme
 
@@ -108,14 +113,20 @@ CERTBOT_EMAIL=you@example.com
 
 # Log level: trace | debug | info | warn | error (default: info)
 LOG_LEVEL=info
+
+# How long each hero background image is shown in milliseconds (default: 6000)
+VITE_BG_INTERVAL=6000
 ```
 
-### Hero background image
+### Hero background images
 
-Drop a `bg.jpeg` into the `data/` folder — it is served automatically with no rebuild required. `bg.jpg` is also accepted as a fallback. If no file is present, a default landscape photo is used.
+Drop any number of images (jpg, jpeg, png, webp) into the `data/backgrounds/` folder — they are served and rotated automatically with no config or rebuild required. The rotation interval is configurable via `VITE_BG_INTERVAL` (milliseconds, default 6000). If the folder is empty, a single fallback image is used:
 
-- **Without Docker:** place the image at `data/bg.jpeg` in the project root
-- **With Docker:** place the image at `./data/bg.jpeg` on the server (same folder as the database)
+- Drop a `bg.jpeg` (or `bg.jpg`) into `data/` as the fallback image
+- If no fallback is present either, a default landscape photo is shown
+
+**Without Docker:** place images in `data/backgrounds/` in the project root
+**With Docker:** place images in `./data/backgrounds/` on the server (same volume as the database)
 
 ---
 
@@ -275,7 +286,7 @@ cabin-reserve/
 │       └── calendar.ts   # GET /api/calendar.ics — iCal feed
 ├── src/
 │   ├── views/
-│   │   ├── HomeView.vue      # Hero image configured here
+│   │   ├── HomeView.vue      # Hero slideshow (images auto-loaded from data/backgrounds/)
 │   │   ├── BookView.vue      # Date picker + guest form
 │   │   ├── ConfirmView.vue   # Review and submit
 │   │   ├── CancelView.vue    # Self-service cancellation
@@ -292,6 +303,10 @@ cabin-reserve/
 ├── scripts/
 │   ├── init-ssl.sh           # First-time Let's Encrypt certificate issuance
 │   └── renew-ssl.sh          # Manual certificate renewal
+├── data/
+│   ├── backgrounds/          # Drop slideshow images here (jpg/jpeg/png/webp)
+│   ├── bg.jpg                # Fallback hero image (optional)
+│   └── cabin.db              # SQLite database (auto-created)
 ├── Dockerfile
 ├── docker-compose.yml        # App + nginx + certbot
 ├── .env.example              # Copy to .env and fill in your values
