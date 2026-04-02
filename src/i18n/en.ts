@@ -29,10 +29,8 @@ export default {
     nights: 'night | nights',
     name: 'Your Name',
     email: 'Email',
-    guests: 'Number of Guests',
     notes: 'Notes',
     notesPlaceholder: 'Anything we should know…',
-    guestOption: '{n} guest | {n} guests',
     legendPending: 'Pending confirmation',
     reviewBtn: 'Review Booking',
     errors: {
@@ -76,7 +74,6 @@ export default {
     colEmail: 'Email',
     colCheckIn: 'Check-in',
     colCheckOut: 'Check-out',
-    colGuests: 'Guests',
     colNotes: 'Notes',
     colBookedOn: 'Booked on',
     colStatus: 'Status',

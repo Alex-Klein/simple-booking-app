@@ -22,7 +22,7 @@ router.get('/', (_req, res) => {
 
 // POST /api/bookings — create a booking
 router.post('/', (req, res) => {
-  const { name, email, guests, notes, check_in, check_out } = req.body
+  const { name, email, notes, check_in, check_out } = req.body
 
   if (!name || !email || !check_in || !check_out) {
     res.status(400).json({ error: 'name, email, check_in and check_out are required' })
@@ -52,9 +52,9 @@ router.post('/', (req, res) => {
   const cancel_token = nanoid(32)
 
   const result = db.prepare(`
-    INSERT INTO bookings (name, email, guests, notes, check_in, check_out, cancel_token, status)
-    VALUES (@name, @email, @guests, @notes, @check_in, @check_out, @cancel_token, @status)
-  `).run({ name, email, guests: guests ?? 1, notes: notes ?? '', check_in, check_out, cancel_token, status })
+    INSERT INTO bookings (name, email, notes, check_in, check_out, cancel_token, status)
+    VALUES (@name, @email, @notes, @check_in, @check_out, @cancel_token, @status)
+  `).run({ name, email, notes: notes ?? '', check_in, check_out, cancel_token, status })
 
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(result.lastInsertRowid) as any
 
@@ -63,12 +63,12 @@ router.post('/', (req, res) => {
 
   if (status === 'confirmed') {
     // Auto-confirmed: send regular confirmation email
-    sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
+    sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl }).catch((err) =>
       logger.error({ err, bookingId: booking.id }, 'Confirmation email failed')
     )
   } else {
     // Pending: notify guest their request was received, notify admin to approve
-    sendPendingBookingEmails({ name, email, guests, notes, check_in, check_out, appUrl }).catch((err) =>
+    sendPendingBookingEmails({ name, email, notes, check_in, check_out, appUrl }).catch((err) =>
       logger.error({ err, bookingId: booking.id }, 'Pending notification email failed')
     )
   }
@@ -95,8 +95,8 @@ router.post('/:id/confirm', requireAdmin, (req, res) => {
   const updated = db.prepare('SELECT * FROM bookings WHERE id = ?').get(id) as any
 
   const cancelUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/cancel?token=${booking.cancel_token}`
-  const { name, email, guests, notes, check_in, check_out } = booking
-  sendBookingEmails({ name, email, guests, notes, check_in, check_out, cancelUrl }).catch((err) =>
+  const { name, email, notes, check_in, check_out } = booking
+  sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl }).catch((err) =>
     logger.error({ err, bookingId: id }, 'Approval email failed')
   )
 
@@ -132,7 +132,7 @@ router.post('/:id/decline', requireAdmin, (req, res) => {
 // PUT /api/bookings/:id — update a booking (admin only)
 router.put('/:id', requireAdmin, (req, res) => {
   const { id } = req.params
-  const { name, email, guests, notes, check_in, check_out } = req.body
+  const { name, email, notes, check_in, check_out } = req.body
 
   const existing = db.prepare('SELECT id FROM bookings WHERE id = ?').get(id)
   if (!existing) {
@@ -151,9 +151,9 @@ router.put('/:id', requireAdmin, (req, res) => {
   }
 
   db.prepare(`
-    UPDATE bookings SET name=@name, email=@email, guests=@guests, notes=@notes,
+    UPDATE bookings SET name=@name, email=@email, notes=@notes,
     check_in=@check_in, check_out=@check_out WHERE id=@id
-  `).run({ id, name, email, guests, notes, check_in, check_out })
+  `).run({ id, name, email, notes, check_in, check_out })
 
   res.json(db.prepare('SELECT * FROM bookings WHERE id = ?').get(id))
 })

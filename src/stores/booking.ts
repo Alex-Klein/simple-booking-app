@@ -4,7 +4,6 @@ import { ref, computed } from 'vue'
 export interface GuestInfo {
   name: string
   email: string
-  guests: number
   notes: string
 }
 
@@ -25,7 +24,6 @@ export const useBookingStore = defineStore('booking', () => {
   const guestInfo = ref<GuestInfo>({
     name: '',
     email: '',
-    guests: 2,
     notes: '',
   })
 
@@ -49,7 +47,6 @@ export const useBookingStore = defineStore('booking', () => {
       body: JSON.stringify({
         name: guestInfo.value.name,
         email: guestInfo.value.email,
-        guests: guestInfo.value.guests,
         notes: guestInfo.value.notes,
         check_in: toDateString(checkIn.value!),
         check_out: toDateString(checkOut.value!),
@@ -83,7 +80,7 @@ export const useBookingStore = defineStore('booking', () => {
 
   function reset() {
     clearDates()
-    guestInfo.value = { name: '', email: '', guests: 2, notes: '' }
+    guestInfo.value = { name: '', email: '', notes: '' }
   }
 
   return {

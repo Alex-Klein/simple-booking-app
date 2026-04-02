@@ -29,10 +29,8 @@ export default {
     nights: 'Nacht | Nächte',
     name: 'Vollständiger Name',
     email: 'E-Mail',
-    guests: 'Anzahl Gäste',
     notes: 'Bemerkungen',
     notesPlaceholder: 'Gibt es etwas zu wissen?',
-    guestOption: '{n} Gast | {n} Gäste',
     legendPending: 'Ausstehende Bestätigung',
     reviewBtn: 'Buchung prüfen',
     errors: {
@@ -76,7 +74,6 @@ export default {
     colEmail: 'E-Mail',
     colCheckIn: 'Anreise',
     colCheckOut: 'Abreise',
-    colGuests: 'Gäste',
     colNotes: 'Bemerkungen',
     colBookedOn: 'Gebucht am',
     colStatus: 'Status',

@@ -37,7 +37,6 @@
             <th class="px-4 py-3 text-left">{{ t('admin.colEmail') }}</th>
             <th class="px-4 py-3 text-left">{{ t('admin.colCheckIn') }}</th>
             <th class="px-4 py-3 text-left">{{ t('admin.colCheckOut') }}</th>
-            <th class="px-4 py-3 text-center">{{ t('admin.colGuests') }}</th>
             <th class="px-4 py-3 text-left">{{ t('admin.colNotes') }}</th>
             <th class="px-4 py-3 text-left">{{ t('admin.colBookedOn') }}</th>
             <th class="px-4 py-3 text-left">{{ t('admin.colStatus') }}</th>
@@ -50,7 +49,6 @@
             <td class="px-4 py-3 text-cabin-600 dark:text-gray-300">{{ b.email }}</td>
             <td class="px-4 py-3 dark:text-gray-300">{{ formatDate(b.check_in) }}</td>
             <td class="px-4 py-3 dark:text-gray-300">{{ formatDate(b.check_out) }}</td>
-            <td class="px-4 py-3 text-center dark:text-gray-300">{{ b.guests }}</td>
             <td class="px-4 py-3 text-cabin-500 dark:text-gray-400 italic">{{ b.notes || '—' }}</td>
             <td class="px-4 py-3 text-cabin-400 dark:text-gray-500 text-xs">{{ formatDateTime(b.created_at) }}</td>
             <td class="px-4 py-3">
@@ -119,12 +117,6 @@
           <div>
             <label class="block text-xs font-medium text-cabin-600 dark:text-gray-400 mb-1">{{ t('admin.colCheckOut') }}</label>
             <input v-model="editForm.check_out" type="date" class="w-full border border-cabin-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-cabin-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-cabin-400 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-cabin-600 dark:text-gray-400 mb-1">{{ t('admin.colGuests') }}</label>
-            <select v-model="editForm.guests" class="w-full border border-cabin-200 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-cabin-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-cabin-400 text-sm">
-              <option v-for="n in 4" :key="n" :value="n">{{ n }}</option>
-            </select>
           </div>
           <div>
             <label class="block text-xs font-medium text-cabin-600 dark:text-gray-400 mb-1">{{ t('admin.colNotes') }}</label>
@@ -198,7 +190,6 @@ interface Booking {
   id: number
   name: string
   email: string
-  guests: number
   notes: string
   check_in: string
   check_out: string
@@ -217,7 +208,7 @@ const copied = ref(false)
 
 const editTarget = ref<Booking | null>(null)
 const editError = ref('')
-const editForm = reactive({ name: '', email: '', guests: 2, notes: '', check_in: '', check_out: '' })
+const editForm = reactive({ name: '', email: '', notes: '', check_in: '', check_out: '' })
 
 const deleteTarget = ref<Booking | null>(null)
 const declineTarget = ref<Booking | null>(null)
@@ -273,7 +264,7 @@ function formatDateTime(str: string) {
 function openEdit(b: Booking) {
   editTarget.value = b
   editError.value = ''
-  Object.assign(editForm, { name: b.name, email: b.email, guests: b.guests, notes: b.notes, check_in: b.check_in, check_out: b.check_out })
+  Object.assign(editForm, { name: b.name, email: b.email, notes: b.notes, check_in: b.check_in, check_out: b.check_out })
 }
 
 async function saveEdit() {

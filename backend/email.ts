@@ -12,7 +12,6 @@ const ADMIN = process.env.ADMIN_EMAIL ?? ''
 interface BookingDetails {
   name: string
   email: string
-  guests: number
   notes: string
   check_in: string
   check_out: string
@@ -22,7 +21,6 @@ interface BookingDetails {
 interface PendingBookingDetails {
   name: string
   email: string
-  guests: number
   notes: string
   check_in: string
   check_out: string
@@ -37,7 +35,7 @@ function formatDate(str: string) {
 }
 
 export async function sendBookingEmails(booking: BookingDetails) {
-  const { name, email, guests, notes, check_in, check_out, cancelUrl } = booking
+  const { name, email, notes, check_in, check_out, cancelUrl } = booking
   const checkIn = formatDate(check_in)
   const checkOut = formatDate(check_out)
 
@@ -49,7 +47,6 @@ export async function sendBookingEmails(booking: BookingDetails) {
     <table style="border-collapse:collapse;width:100%;max-width:400px">
       <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0;font-weight:bold">${checkIn}</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0;font-weight:bold">${checkOut}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Guests</td><td style="padding:8px 0">${guests}</td></tr>
       ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
     </table>
     <p style="margin-top:24px;color:#666">See you at the cabin!</p>
@@ -69,7 +66,6 @@ export async function sendBookingEmails(booking: BookingDetails) {
       <tr><td style="padding:8px 0;color:#888">Who</td><td style="padding:8px 0;font-weight:bold">${name} (${email})</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0">${checkIn}</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0">${checkOut}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Guests</td><td style="padding:8px 0">${guests}</td></tr>
       ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
     </table>
   `
@@ -129,7 +125,7 @@ export async function sendDeclineEmail(booking: { name: string; email: string; c
 }
 
 export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
-  const { name, email, guests, notes, check_in, check_out, appUrl } = booking
+  const { name, email, notes, check_in, check_out, appUrl } = booking
   const checkIn = formatDate(check_in)
   const checkOut = formatDate(check_out)
 
@@ -140,7 +136,6 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
     <table style="border-collapse:collapse;width:100%;max-width:400px">
       <tr><td style="padding:8px 0;color:#888">Check-in</td><td style="padding:8px 0;font-weight:bold">${checkIn}</td></tr>
       <tr><td style="padding:8px 0;color:#888">Check-out</td><td style="padding:8px 0;font-weight:bold">${checkOut}</td></tr>
-      <tr><td style="padding:8px 0;color:#888">Guests</td><td style="padding:8px 0">${guests}</td></tr>
       ${notes ? `<tr><td style="padding:8px 0;color:#888">Notes</td><td style="padding:8px 0;font-style:italic">${notes}</td></tr>` : ''}
     </table>
     <p style="margin-top:24px;color:#666">We'll be in touch soon!</p>
