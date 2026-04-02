@@ -3,9 +3,11 @@ import logger from './logger.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const FROM = process.env.FROM_EMAIL ?? 'onboarding@resend.dev'
-const ADMIN = process.env.ADMIN_EMAIL ?? ''
 const APP_NAME = process.env.APP_NAME ?? 'Simple Booking App'
+const fromEmail = process.env.FROM_EMAIL ?? 'onboarding@resend.dev'
+const fromName = process.env.FROM_NAME ?? APP_NAME
+const FROM = `${fromName} <${fromEmail}>`
+const ADMIN = process.env.ADMIN_EMAIL ?? ''
 
 interface BookingDetails {
   name: string
