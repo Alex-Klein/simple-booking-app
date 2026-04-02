@@ -52,9 +52,9 @@ router.post('/', (req, res) => {
   const cancel_token = nanoid(32)
 
   const result = db.prepare(`
-    INSERT INTO bookings (name, email, notes, check_in, check_out, cancel_token, status)
-    VALUES (@name, @email, @notes, @check_in, @check_out, @cancel_token, @status)
-  `).run({ name, email, notes: notes ?? '', check_in, check_out, cancel_token, status })
+    INSERT INTO bookings (name, email, notes, check_in, check_out, cancel_token, status, locale)
+    VALUES (@name, @email, @notes, @check_in, @check_out, @cancel_token, @status, @locale)
+  `).run({ name, email, notes: notes ?? '', check_in, check_out, cancel_token, status, locale: locale ?? 'en' })
 
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(result.lastInsertRowid) as any
 
@@ -95,8 +95,8 @@ router.post('/:id/confirm', requireAdmin, (req, res) => {
   const updated = db.prepare('SELECT * FROM bookings WHERE id = ?').get(id) as any
 
   const cancelUrl = `${process.env.APP_URL ?? 'http://localhost:5173'}/cancel?token=${booking.cancel_token}`
-  const { name, email, notes, check_in, check_out } = booking
-  sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl, locale: 'en' }).catch((err) =>
+  const { name, email, notes, check_in, check_out, locale: bookingLocale } = booking
+  sendBookingEmails({ name, email, notes, check_in, check_out, cancelUrl, locale: bookingLocale ?? 'en' }).catch((err) =>
     logger.error({ err, bookingId: id }, 'Approval email failed')
   )
 
@@ -121,8 +121,8 @@ router.post('/:id/decline', requireAdmin, (req, res) => {
 
   db.prepare('DELETE FROM bookings WHERE id = ?').run(id)
 
-  const { name, email, check_in, check_out } = booking
-  sendDeclineEmail({ name, email, check_in, check_out, reason: reason || undefined }).catch((err) =>
+  const { name, email, check_in, check_out, locale: bookingLocale } = booking
+  sendDeclineEmail({ name, email, check_in, check_out, reason: reason || undefined, locale: bookingLocale ?? 'en' }).catch((err) =>
     logger.error({ err, bookingId: id }, 'Decline email failed')
   )
 

@@ -40,6 +40,10 @@ if (!cols.includes('cancel_token')) {
 if (!cols.includes('status')) {
   db.exec("ALTER TABLE bookings ADD COLUMN status TEXT NOT NULL DEFAULT 'confirmed'")
 }
+// Add locale column — existing bookings default to English
+if (!cols.includes('locale')) {
+  db.exec("ALTER TABLE bookings ADD COLUMN locale TEXT NOT NULL DEFAULT 'en'")
+}
 
 
 export default db
