@@ -2,23 +2,15 @@
 
 ## Bugs / loose ends
 
-- [ ] **Nights count missing number** — the summary bar may show "nights" without the digit in front; should read "3 nights" not just "nights"
-- [ ] **Verify back-to-back visuals** — confirm half-day range caps and merged tooltip look correct in production after latest calendar changes
-- [ ] **Existing bookings shifted by one day** — the UTC→local timezone fix may have silently stored wrong dates for bookings made before the fix; worth reviewing any bookings that pre-date the fix
-
-
-## Infrastructure
-
-
+- [ ] **Nights count missing number** — summary bar shows "nights" without the digit; should read e.g. "3 nights"
+- [ ] **Verify back-to-back visuals** — confirm half-day range caps and merged tooltip look correct in production
+- [ ] **Existing bookings off by one day** — the UTC→local timezone fix may have shifted dates for bookings made before the fix; worth a manual check
 
 ## Features
 
-- [ ] **Block dates** — admin can mark date ranges as unavailable (maintenance, personal use) so guests cannot book them
+- [ ] **Emails in guest's language** — detect the browser language at submission time and send emails in EN or DE accordingly
+- [ ] **Block dates** — admin can mark date ranges as unavailable (maintenance, personal use)
 - [ ] **Pre-arrival reminder email** — send guest a reminder N days before check-in (configurable via env var)
-- [ ] **Export bookings to CSV** — download button in admin dashboard for simple record-keeping
-- [ ] **Guest count in admin cards** — show number of guests next to each booking in the dashboard list
 - [ ] **Booking history** — keep a log of declined and cancelled bookings visible to admin (currently deleted from DB)
-- [ ] **Branded email templates** — replace plain-text emails with a simple HTML template matching the app's look
-- [ ] **remove guests** everywhere
-- [ ] email same language as in browser used when submit was pressed
-- [ ] apply language everywhere
+- [ ] **Export bookings to CSV** — download button in admin dashboard
+- [ ] **Branded email templates** — nicer HTML layout matching the app's look and feel
