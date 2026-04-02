@@ -8,7 +8,8 @@
 
 ## Features
 
-- [ ] **Emails in guest's language** — detect the browser language at submission time and send emails in EN or DE accordingly
+- [x] **Emails in guest's language** — locale sent at submission, guest emails in EN/DE accordingly
+- [ ] **Locale stored on booking** — persist locale in DB so admin-triggered emails (approve, decline) also go out in the guest's language
 - [ ] **Block dates** — admin can mark date ranges as unavailable (maintenance, personal use)
 - [ ] **Pre-arrival reminder email** — send guest a reminder N days before check-in (configurable via env var)
 - [ ] **Booking history** — keep a log of declined and cancelled bookings visible to admin (currently deleted from DB)
