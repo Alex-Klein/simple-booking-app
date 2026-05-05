@@ -31,6 +31,11 @@ interface PendingBookingDetails {
 
 const T = {
   en: {
+    reminderSubject: (app: string, date: string) => `${app} — Your stay starts soon (${date})`,
+    reminderTitle: (app: string) => `Your stay at ${app} is coming up! 🏕️`,
+    reminderIntro: (name: string) => `Hi ${name},`,
+    reminderBody: (n: number) => `Just a reminder that your stay begins in ${n} day${n === 1 ? '' : 's'}. Here are your details:`,
+    reminderClosing: `We look forward to welcoming you!`,
     confirmSubject: (app: string, date: string) => `${app} — Reservation confirmed (${date})`,
     confirmTitle: (app: string) => `Your stay at ${app} is confirmed! 🌲`,
     confirmIntro: (name: string) => `Hi ${name},`,
@@ -52,6 +57,11 @@ const T = {
     labelNotes: `Notes`,
   },
   de: {
+    reminderSubject: (app: string, date: string) => `${app} — Dein Aufenthalt beginnt bald (${date})`,
+    reminderTitle: (app: string) => `Dein Aufenthalt im ${app} steht bevor! 🏕️`,
+    reminderIntro: (name: string) => `Hallo ${name},`,
+    reminderBody: (n: number) => `Zur Erinnerung: Dein Aufenthalt beginnt in ${n} Tag${n === 1 ? '' : 'en'}. Hier deine Details:`,
+    reminderClosing: `Wir freuen uns auf deinen Besuch!`,
     confirmSubject: (app: string, date: string) => `${app} — Reservation bestätigt (${date})`,
     confirmTitle: (app: string) => `Dein Aufenthalt im ${app} ist bestätigt! 🌲`,
     confirmIntro: (name: string) => `Hallo ${name},`,
@@ -262,4 +272,40 @@ export async function sendPendingBookingEmails(booking: PendingBookingDetails) {
     if (r.error) logger.error({ err: r.error }, `Email ${i} (pending notification) failed`)
     else logger.info({ emailId: r.data?.id }, `Email ${i} (pending notification) sent`)
   })
+}
+
+export async function sendReminderEmail(booking: BookingDetails & { daysUntil: number }) {
+  const { name, email, notes, check_in, check_out, cancelUrl, locale, daysUntil } = booking
+  const tr = t(locale)
+  const checkIn = formatDate(check_in, locale)
+  const checkOut = formatDate(check_out, locale)
+
+  const rows = [
+    { label: tr.labelCheckIn, value: checkIn, bold: true },
+    { label: tr.labelCheckOut, value: checkOut, bold: true },
+    ...(notes ? [{ label: tr.labelNotes, value: `<em>${notes}</em>` }] : []),
+  ]
+
+  const html = layout(`
+    <h1 style="margin:0 0 8px;font-size:22px;color:#1a1a1a;">${tr.reminderTitle(APP_NAME)}</h1>
+    <p style="margin:0 0 4px;font-size:15px;color:#3a3a3a;">${tr.reminderIntro(name)}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#6b6b6b;">${tr.reminderBody(daysUntil)}</p>
+    ${detailsTable(rows)}
+    <p style="margin:24px 0 0;font-size:14px;color:#6b6b6b;">${tr.reminderClosing}</p>
+    ${cancelUrl ? `
+    <hr style="margin:32px 0;border:none;border-top:1px solid #ede8e0;" />
+    <p style="margin:0 0 8px;font-size:13px;color:#a89880;">${tr.cancelNote}</p>
+    ${primaryBtn(cancelUrl, tr.cancelBtn, '#dc2626')}
+    ` : ''}
+  `)
+
+  const result = await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: tr.reminderSubject(APP_NAME, checkIn),
+    html,
+  })
+
+  if (result.error) logger.error({ err: result.error }, 'Reminder email failed')
+  else logger.info({ emailId: result.data?.id }, 'Reminder email sent')
 }

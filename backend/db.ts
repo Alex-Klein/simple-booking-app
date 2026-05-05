@@ -48,6 +48,10 @@ if (!cols.includes('locale')) {
 if (!cols.includes('declined_reason')) {
   db.exec("ALTER TABLE bookings ADD COLUMN declined_reason TEXT")
 }
+// Add reminder_sent flag — 1 once the pre-arrival reminder has been dispatched
+if (!cols.includes('reminder_sent')) {
+  db.exec("ALTER TABLE bookings ADD COLUMN reminder_sent INTEGER NOT NULL DEFAULT 0")
+}
 
 
 export default db

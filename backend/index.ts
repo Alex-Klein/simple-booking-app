@@ -9,6 +9,7 @@ import bookingsRouter from './routes/bookings.js'
 import authRouter from './routes/auth.js'
 import cancelRouter from './routes/cancel.js'
 import calendarRouter from './routes/calendar.js'
+import { startReminderScheduler } from './scheduler.js'
 
 const app = express()
 const PORT = parseInt(process.env.PORT ?? '3001', 10)
@@ -82,4 +83,5 @@ if (process.env.NODE_ENV === 'production') {
 
 app.listen(PORT, () => {
   logger.info({ port: PORT }, 'Backend started')
+  startReminderScheduler()
 })

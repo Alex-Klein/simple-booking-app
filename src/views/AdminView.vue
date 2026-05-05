@@ -25,6 +25,12 @@
       </div>
     </div>
 
+    <!-- Action error banner -->
+    <div v-if="actionError" class="mb-4 flex items-center justify-between bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm px-4 py-3 rounded-xl">
+      <span>{{ actionError }}</span>
+      <button @click="actionError = ''" class="ml-4 text-red-400 hover:text-red-600 dark:hover:text-red-200">✕</button>
+    </div>
+
     <!-- Bookings table -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-cabin-100 dark:border-gray-700 overflow-hidden">
       <div v-if="loading" class="p-12 text-center text-cabin-400 dark:text-gray-500">{{ t('admin.loading') }}</div>
@@ -263,6 +269,7 @@ const copied = ref(false)
 const editTarget = ref<Booking | null>(null)
 const editError = ref('')
 const editForm = reactive({ name: '', email: '', notes: '', check_in: '', check_out: '' })
+const actionError = ref('')
 
 const deleteTarget = ref<Booking | null>(null)
 const declineTarget = ref<Booking | null>(null)
@@ -274,6 +281,11 @@ async function fetchBookings() {
     fetch('/api/bookings', { headers: auth.authHeaders() }),
     fetch('/api/bookings/history', { headers: auth.authHeaders() }),
   ])
+  if (historyRes.status === 401) {
+    loading.value = false
+    handleUnauthorized()
+    return
+  }
   bookings.value = await activeRes.json()
   history.value = await historyRes.json()
   loading.value = false
@@ -352,35 +364,59 @@ function openDecline(b: Booking) {
   declineReason.value = ''
 }
 
+function handleUnauthorized() {
+  auth.logout()
+  router.push('/login')
+}
+
 async function doDecline() {
   saving.value = true
-  await fetch(`/api/bookings/${declineTarget.value!.id}/decline`, {
+  const res = await fetch(`/api/bookings/${declineTarget.value!.id}/decline`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...auth.authHeaders() },
     body: JSON.stringify({ reason: declineReason.value }),
   })
   saving.value = false
+  if (!res.ok) {
+    if (res.status === 401) { handleUnauthorized(); return }
+    const body = await res.json().catch(() => ({}))
+    actionError.value = body.error ?? 'Could not decline booking'
+    return
+  }
   declineTarget.value = null
   await fetchBookings()
 }
 
 async function approveBooking(b: Booking) {
+  actionError.value = ''
   saving.value = true
-  await fetch(`/api/bookings/${b.id}/confirm`, {
+  const res = await fetch(`/api/bookings/${b.id}/confirm`, {
     method: 'POST',
     headers: auth.authHeaders(),
   })
   saving.value = false
+  if (!res.ok) {
+    if (res.status === 401) { handleUnauthorized(); return }
+    const body = await res.json().catch(() => ({}))
+    actionError.value = body.error ?? 'Could not confirm booking'
+    return
+  }
   await fetchBookings()
 }
 
 async function doDelete() {
   saving.value = true
-  await fetch(`/api/bookings/${deleteTarget.value!.id}`, {
+  const res = await fetch(`/api/bookings/${deleteTarget.value!.id}`, {
     method: 'DELETE',
     headers: auth.authHeaders(),
   })
   saving.value = false
+  if (!res.ok) {
+    if (res.status === 401) { handleUnauthorized(); return }
+    const body = await res.json().catch(() => ({}))
+    actionError.value = body.error ?? 'Could not delete booking'
+    return
+  }
   deleteTarget.value = null
   await fetchBookings()
 }

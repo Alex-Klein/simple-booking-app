@@ -223,31 +223,20 @@ cp .env.example .env
 nano .env   # fill in all variables
 ```
 
-**3. Obtain an SSL certificate** (your domain must already point to this server):
-```bash
-chmod +x scripts/init-ssl.sh
-./scripts/init-ssl.sh
-```
-
-**4. Build and start:**
+**3. Build and start:**
 ```bash
 docker compose up -d --build
 ```
 
-The app is now running on port 443 (HTTPS) with automatic HTTP → HTTPS redirect. The SQLite database is persisted in `./data/` and is never affected by redeployments.
+The app container joins the external `web` Docker network. SSL termination, HTTPS redirect, and certificate renewal are handled by the shared [nginx-proxy](https://github.com/Alex-Klein/nginx-proxy) service — start that first if not already running.
+
+The SQLite database is persisted in `./data/` and is never affected by redeployments.
 
 ### Deploying updates
 
 ```bash
 git pull
 docker compose up -d --build
-```
-
-### SSL renewal
-
-Certificates are renewed automatically — the certbot container checks every 12 hours. To renew manually:
-```bash
-./scripts/renew-ssl.sh
 ```
 
 ### Useful commands
@@ -298,11 +287,6 @@ cabin-reserve/
 │   └── i18n/
 │       ├── en.ts
 │       └── de.ts
-├── nginx/
-│   └── nginx.conf.template   # nginx config (DOMAIN + PORT substituted at startup)
-├── scripts/
-│   ├── init-ssl.sh           # First-time Let's Encrypt certificate issuance
-│   └── renew-ssl.sh          # Manual certificate renewal
 ├── data/
 │   ├── backgrounds/          # Drop slideshow images here (jpg/jpeg/png/webp)
 │   ├── bg.jpg                # Fallback hero image (optional)
